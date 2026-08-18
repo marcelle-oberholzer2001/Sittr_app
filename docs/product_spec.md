@@ -16,19 +16,20 @@ Facebook groups are still where most South Africans find pet sitters — not bec
 
 **MVP (build/finish first):**
 - Splash + role selection + signup
-- Sitter onboarding: coverage area (map + radius), personal details, verification (ID + HURU criminal check), services & pricing, per-service pet preferences, bank details
+- Sitter onboarding: coverage area (named suburbs, searched and added — not a map/radius), personal details, verification (ID + HURU criminal check), services & pricing, per-service pet preferences, bank details
 - Owner onboarding: skip-to-browse quick start, pet passport, ID verification
-- Search & matching (radius-based location + dates + service type)
+- Search & matching (suburb-based location + dates + service type)
 - Sitter profile page
 - Booking flow: request → accept/decline → review & sign agreement → pay in full → confirm
 - Basic chat
+- Sit Clipboard (auto-filled from Pet Passport + owner's home details, plus a meet & greet checklist and an accumulating notes log per pet parent)
 - Cancellation policy (72-hour rule)
 - Reviews (both directions)
 - Payouts (single release, 2 days post-sit)
 
 **Phase 2:**
 - Referral system + referral rewards
-- Sit Clipboard + live update checklist + care timeline
+- Live update checklist + care timeline (scheduled during-sit prompts and photo log — separate from the Sit Clipboard reference doc, which is now MVP)
 - SOS backup-sitter flow
 - Full Trust Score formula (MVP can launch with a simpler star rating only)
 - Loyalty/repeat-client discounts for owners
@@ -72,7 +73,7 @@ Paw icon (or whichever logo direction is chosen) with parts lighting up sequenti
 3. **Personal details** — full legal name, DOB (hard 18+ gate, no exceptions), sex as on ID, profile + gallery photos.
 4. **Work schedule** — single-select: 9–5 office / remote / part-time / student / shift work / not working / retired.
 5. **Transport & emergency** — has own transport (Y/N) + license upload if yes; backup driver toggle + emergency contact if no.
-6. **Verification** — ID document and proof of address are **required (a hard gate)** before a sitter is active/searchable at all. **The criminal background check (HURU) is optional**, not a gate — a sitter can go live without one, but passing it earns a visible "Background Checked" badge and a significant Trust Score boost (it's the single largest item in the Verification component of the formula). Standard HURU results often return same-day (R280–480 depending on speed tier) at 500+ PostNet/Jetline locations. ⚠️ **This was changed from an earlier mandatory design specifically to reduce sitter signup friction — worth knowing this trades away some of the "everyone here is vetted" promise that originally validated the idea in market feedback. Revisit once real usage data shows whether owners actually filter for the badge or book unchecked sitters anyway.**
+6. **Verification** — an ID document is **required (a hard gate)** before a sitter is active/searchable at all. Proof of address was originally also required but was dropped to reduce signup friction, since coverage matching no longer relies on a home address anyway (see Section 4, coverage area). **The criminal background check (HURU) is optional**, not a gate — a sitter can go live without one, but passing it earns a visible "Background Checked" badge and a significant Trust Score boost (it's the single largest item in the Verification component of the formula). Standard HURU results often return same-day (R280–480 depending on speed tier) at 500+ PostNet/Jetline locations. ⚠️ **This was changed from an earlier mandatory design specifically to reduce sitter signup friction — worth knowing this trades away some of the "everyone here is vetted" promise that originally validated the idea in market feedback. Revisit once real usage data shows whether owners actually filter for the badge or book unchecked sitters anyway.**
 7. **Services & rates** — sitter turns on only the services she offers, each with its own price:
    - 1x daily visit (per visit)
    - 2x daily visits (per day)
@@ -229,4 +230,6 @@ The 2-day payout hold exists specifically to allow disputes to surface, but ther
 
 ## 17. Changelog
 
-Latest update: **criminal background check changed from mandatory to optional** (Section 4) — now earns a badge and a Trust Score boost rather than gating search visibility, done to reduce sitter signup friction. ID + address remain mandatory. The Trust Score's Verification component (Section 9, and the formula/calculator files) was rebalanced to reflect this — baseline floor dropped from 40 to 30 points, with the criminal check itself now worth +30 as the single largest optional item. Marketing materials (brand guide, website brief) were corrected to stop claiming universal background checks, since that's no longer accurate.
+Latest update: **Sit Clipboard moved from Phase 2 into MVP** (Section 2) — Marcelle decided the pet/home-details reference doc and per-parent meet & greet notes log matter enough to build now, rather than after launch. The live-update checklist and care timeline (scheduled during-sit photo prompts) remain Phase 2 — those are a separate feature from the Sit Clipboard itself. Also corrected two other stale spots caught in the same pass: coverage area is now suburb-based, not map + radius (Section 2 MVP list — Section 4 already reflected this, the summary list didn't); and proof of address was dropped from sitter verification (Section 4) after being cut for signup friction, no longer a hard gate alongside the ID document.
+
+Earlier update: **criminal background check changed from mandatory to optional** (Section 4) — now earns a badge and a Trust Score boost rather than gating search visibility, done to reduce sitter signup friction. ID remains mandatory. The Trust Score's Verification component (Section 9, and the formula/calculator files) was rebalanced to reflect this — baseline floor dropped from 40 to 30 points, with the criminal check itself now worth +30 as the single largest optional item. Marketing materials (brand guide, website brief) were corrected to stop claiming universal background checks, since that's no longer accurate.

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Set Your Rates</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:40px 16px; }
+  .phone{ width:390px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+  .content{ padding:10px 20px 24px; }
+  h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; margin:8px 0 6px; }
+  .desc{ font-size:0.84rem; color:var(--muted); line-height:1.5; margin-bottom:20px; }
+
+  .rate-row{ display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .rate-toggle{ flex:1.3; padding:13px; border-radius:12px; border:1.5px solid var(--line); font-size:0.82rem; font-weight:700; background:#fff; cursor:pointer; color:var(--muted); text-align:center; user-select:none; }
+  .rate-toggle.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+  .rate-toggle.clay.on{ background:var(--clay); border-color:var(--clay); }
+  .rate-input{ flex:1; display:flex; align-items:center; gap:4px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; transition:opacity 0.2s; }
+  .rate-input.off{ opacity:0.35; }
+  .rate-input span{ font-size:0.8rem; font-weight:700; color:var(--muted); }
+  .rate-input .unit{ font-weight:600; font-size:0.68rem; white-space:nowrap; }
+  .rate-input input{ border:none; width:100%; font-family:'Manrope'; font-weight:800; font-size:0.88rem; color:var(--ink); outline:none; background:transparent; }
+  .rate-input input:disabled{ pointer-events:none; }
+
+  .note{ margin-top:18px; background:#E4EEE9; border-radius:14px; padding:14px; font-size:0.78rem; color:var(--forest); line-height:1.55; }
+  .note b{ display:block; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:4px; }
+
+  .continue-btn{ margin-top:22px; background:var(--forest); color:#fff; font-weight:700; padding:15px; border-radius:14px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+  <div class="content">
+    <h2>Set your rates</h2>
+    <div class="desc">Turn on every service you want to offer, and set your own price for each one. Leave the rest off — owners will only ever see prices for services you've actually turned on.</div>
+
+    <div class="rate-row">
+      <div class="rate-toggle on" onclick="toggle(this)">1x daily visit</div>
+      <div class="rate-input"><span>R</span><input type="text" value="80"><span class="unit">/ visit</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle on" onclick="toggle(this)">2x daily visits</div>
+      <div class="rate-input"><span>R</span><input type="text" value="140"><span class="unit">/ day</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle" onclick="toggle(this)">Daytime pet sit</div>
+      <div class="rate-input off"><span>R</span><input type="text" placeholder="—" disabled><span class="unit">/ day</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle on" onclick="toggle(this)">Overnight / sleepover</div>
+      <div class="rate-input"><span>R</span><input type="text" value="300"><span class="unit">/ night</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle" onclick="toggle(this)">Dog walking</div>
+      <div class="rate-input off"><span>R</span><input type="text" placeholder="—" disabled><span class="unit">/ walk</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle clay" onclick="toggle(this)">Boarding at my home</div>
+      <div class="rate-input off"><span>R</span><input type="text" placeholder="—" disabled><span class="unit">/ night</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle clay" onclick="toggle(this)">Doggy daycare</div>
+      <div class="rate-input off"><span>R</span><input type="text" placeholder="—" disabled><span class="unit">/ day</span></div>
+    </div>
+
+    <div class="note">
+      <b>What this sitter just told us</b>
+      This sitter offers drop-in visits and overnight sleepovers only — no boarding, daycare, or walking. She'll never appear when an owner searches for "Boarding," and no boarding screening questions will apply to her.
+    </div>
+
+    <div class="continue-btn">Continue</div>
+  </div>
+</div>
+
+<script>
+  function toggle(el){
+    el.classList.toggle('on');
+    const input = el.nextElementSibling;
+    const isOn = el.classList.contains('on');
+    input.classList.toggle('off', !isOn);
+    input.querySelector('input').disabled = !isOn;
+    if(isOn && !input.querySelector('input').value){ input.querySelector('input').placeholder = 'e.g. 250'; }
+  }
+</script>
+</body>
+</html>

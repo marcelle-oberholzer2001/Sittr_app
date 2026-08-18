@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Find a Sitter &amp; Profile</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E; --forest-deep:#1F3830;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink);
+    display:flex; flex-wrap:wrap; justify-content:center; gap:30px; padding:40px 16px;
+  }
+  .phone{
+    width:390px; max-width:100%; background:var(--paper);
+    border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111;
+    display:flex; flex-direction:column;
+  }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; flex-shrink:0; }
+  .scroll{ overflow-y:auto; max-height:700px; }
+  .col-label{ width:390px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:1rem; color:#6b6558; margin-bottom:-14px; }
+
+  /* ===== SEARCH PAGE ===== */
+  .header{ padding:6px 18px 14px; }
+  .title-row{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px; }
+  .title-row h1{ font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; margin:0; }
+  .trust-pill{ font-size:0.64rem; font-weight:700; color:var(--forest); background:#E4EEE9; border-radius:20px; padding:5px 9px; }
+  .search-card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:12px 14px; display:flex; align-items:center; gap:12px; }
+  .search-card .loc{ font-weight:700; font-size:0.9rem; }
+  .search-card .sub{ font-size:0.74rem; color:var(--muted); margin-top:2px; }
+  .map-btn{ width:36px;height:36px;border-radius:12px; background:var(--forest); display:flex;align-items:center;justify-content:center; color:#fff; flex-shrink:0; }
+
+  .chips-row{ display:flex; gap:8px; overflow-x:auto; padding:14px 18px 4px; scrollbar-width:none; }
+  .chips-row::-webkit-scrollbar{ display:none; }
+  .chip{ flex-shrink:0; padding:7px 13px; border-radius:20px; font-size:0.73rem; font-weight:700; border:1px solid var(--line); background:var(--card); white-space:nowrap; }
+  .chip.active{ background:var(--forest); border-color:var(--forest); color:#fff; }
+  .chip.new{ border-color:var(--clay); color:var(--clay); }
+  .chip.new.active{ background:var(--clay); border-color:var(--clay); color:#fff; }
+
+  .list{ padding:10px 14px 20px; display:flex; flex-direction:column; gap:12px; }
+  .sitter-card{ background:var(--card); border:1px solid var(--line); border-radius:20px; padding:14px; display:flex; gap:12px; position:relative; }
+  .avatar{ width:70px;height:70px;border-radius:16px; display:flex;align-items:center;justify-content:center; font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;color:#fff; flex-shrink:0; }
+  .info{ flex:1; min-width:0; }
+  .name-line{ display:flex; align-items:center; gap:5px; }
+  .name-line .name{ font-family:'Fraunces',serif; font-weight:600; font-size:0.98rem; }
+  .verified{ width:15px;height:15px;border-radius:50%; background:var(--forest);color:#fff; font-size:0.58rem;display:flex;align-items:center;justify-content:center; }
+  .meta{ display:flex; align-items:center; gap:8px; font-size:0.72rem; color:var(--muted); margin-top:3px; flex-wrap:wrap; }
+  .meta .stars{ color:var(--gold); font-weight:700; }
+  .service-tags{ display:flex; gap:5px; margin-top:7px; flex-wrap:wrap; }
+  .stag{ font-size:0.62rem; font-weight:800; padding:3px 7px; border-radius:7px; }
+  .stag.board{ background:#F3E3D6; color:var(--clay); }
+  .stag.daycare{ background:#FCEFD8; color:#A87B1E; }
+  .stag.house{ background:#E4EEE9; color:var(--forest); }
+  .trust-ring{ position:absolute; top:12px; right:12px; width:32px;height:32px; display:flex;align-items:center;justify-content:center; font-size:0.64rem;font-weight:800;color:var(--forest); }
+  .trust-ring svg{ position:absolute; top:0; left:0; }
+
+  .tabbar{ display:flex; border-top:1px solid var(--line); background:var(--card); padding:10px 0 22px; flex-shrink:0; }
+  .tabbar div{ flex:1; text-align:center; font-size:0.62rem; font-weight:700; color:var(--muted); }
+  .tabbar div.active{ color:var(--forest); }
+  .tabbar .ic{ font-size:1.05rem; display:block; margin-bottom:2px; }
+
+  /* ===== PROFILE PAGE ===== */
+  .cover{ height:150px; background:linear-gradient(135deg,#3E6152,#1F3830); position:relative; flex-shrink:0; }
+  .cover .back{ position:absolute; top:16px; left:16px; width:34px;height:34px; background:rgba(255,255,255,0.9); border-radius:50%; display:flex;align-items:center;justify-content:center; }
+  .gallery-dots{ position:absolute; bottom:10px; left:50%; transform:translateX(-50%); display:flex; gap:5px; }
+  .gallery-dots span{ width:5px;height:5px;border-radius:50%; background:rgba(255,255,255,0.5); }
+  .gallery-dots span:first-child{ background:#fff; width:14px; border-radius:3px; }
+
+  .profile-head{ padding:0 20px; margin-top:-40px; position:relative; }
+  .p-avatar{ width:84px;height:84px;border-radius:20px; background:var(--clay); border:4px solid var(--paper); display:flex;align-items:center;justify-content:center; font-family:'Fraunces',serif;font-weight:600;font-size:1.8rem;color:#fff; }
+  .p-name-row{ display:flex; align-items:center; justify-content:space-between; margin-top:10px; }
+  .p-name{ font-family:'Fraunces',serif; font-weight:600; font-size:1.3rem; display:flex; align-items:center; gap:6px; }
+  .p-trust{ width:44px;height:44px; position:relative; display:flex;align-items:center;justify-content:center; font-size:0.8rem;font-weight:800;color:var(--forest); }
+  .p-trust svg{ position:absolute; top:0; left:0; }
+  .p-meta{ font-size:0.78rem; color:var(--muted); margin-top:4px; }
+  .p-meta .stars{ color:var(--gold); font-weight:700; }
+
+  .p-badges{ display:flex; gap:6px; margin-top:12px; flex-wrap:wrap; }
+  .pbadge{ font-size:0.66rem; font-weight:700; background:#F1EEE6; color:var(--forest); border-radius:8px; padding:4px 8px; display:flex; align-items:center; gap:3px; }
+
+  .p-section{ padding:18px 20px 4px; }
+  .p-section h4{ font-family:'Fraunces',serif; font-size:0.98rem; margin:0 0 8px; }
+  .p-section p.body{ font-size:0.83rem; color:#4a4438; line-height:1.55; margin:0; }
+
+  .stat-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .stat-box{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 8px; text-align:center; }
+  .stat-box .num{ font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; }
+  .stat-box .lbl{ font-size:0.62rem; color:var(--muted); margin-top:2px; }
+
+  .row-chip{ display:flex; flex-wrap:wrap; gap:6px; }
+  .rchip{ font-size:0.74rem; font-weight:700; background:#fff; border:1px solid var(--line); border-radius:16px; padding:6px 11px; }
+  .rchip.on{ background:var(--forest); color:#fff; border-color:var(--forest); }
+
+  .divider{ height:1px; background:var(--line); margin:16px 20px; }
+
+  .home-box{ background:#F1EEE6; border-radius:14px; padding:14px; }
+  .home-row{ display:flex; justify-content:space-between; font-size:0.8rem; padding:5px 0; }
+  .home-row span:first-child{ color:var(--muted); }
+  .home-row span:last-child{ font-weight:700; }
+
+  .review{ background:#fff; border:1px solid var(--line); border-radius:14px; padding:12px 14px; margin-bottom:10px; }
+  .review .rhead{ display:flex; justify-content:space-between; font-size:0.78rem; font-weight:700; margin-bottom:4px; }
+  .review .rtext{ font-size:0.8rem; color:#4a4438; line-height:1.45; }
+
+  .book-bar{ padding:14px 20px 26px; background:var(--paper); border-top:1px solid var(--line); display:flex; align-items:center; gap:14px; flex-shrink:0; }
+  .book-price{ flex:1; }
+  .book-price .amt{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; }
+  .book-price .per{ font-size:0.7rem; color:var(--muted); }
+  .book-btn{ background:var(--forest); color:#fff; font-weight:700; font-size:0.9rem; padding:14px 26px; border-radius:14px; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">Find a sitter — updated</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header">
+        <div class="title-row">
+          <h1>Find a sitter</h1>
+          <span class="trust-pill">🛡 Verified network</span>
+        </div>
+        <div class="search-card">
+          <span>📍</span>
+          <div style="flex:1;">
+            <div class="loc">Centurion, Gauteng</div>
+            <div class="sub">Add dates · Add pets</div>
+          </div>
+          <div class="map-btn">🗺</div>
+        </div>
+      </div>
+
+      <div class="chips-row">
+        <div class="chip active">All sitters</div>
+        <div class="chip">✔ Verified</div>
+        <div class="chip new">🏠 Boarding</div>
+        <div class="chip new">☀️ Daycare</div>
+        <div class="chip">🩹 First Aid</div>
+        <div class="chip">🐕 Large dogs</div>
+        <div class="chip">🐱 Cat specialist</div>
+      </div>
+
+      <div class="list">
+
+        <div class="sitter-card" onclick="document.getElementById('profileNote').scrollIntoView()">
+          <div class="trust-ring">
+            <svg width="32" height="32"><circle cx="16" cy="16" r="13" stroke="#E7E2D8" stroke-width="3" fill="none"/><circle cx="16" cy="16" r="13" stroke="#2C4A3E" stroke-width="3" fill="none" stroke-dasharray="82" stroke-dashoffset="9" stroke-linecap="round" transform="rotate(-90 16 16)"/></svg>
+            92
+          </div>
+          <div class="avatar" style="background:var(--clay);">Z</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Zelnice V.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 5.0</span><span>(1)</span><span>•</span><span>16.3 km</span><span>•</span><span>2 min resp.</span></div>
+            <div class="service-tags">
+              <span class="stag house">House sitting</span>
+              <span class="stag board">Boarding</span>
+              <span class="stag daycare">Daycare</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sitter-card">
+          <div class="trust-ring">
+            <svg width="32" height="32"><circle cx="16" cy="16" r="13" stroke="#E7E2D8" stroke-width="3" fill="none"/><circle cx="16" cy="16" r="13" stroke="#2C4A3E" stroke-width="3" fill="none" stroke-dasharray="82" stroke-dashoffset="38" stroke-linecap="round" transform="rotate(-90 16 16)"/></svg>
+            68
+          </div>
+          <div class="avatar" style="background:var(--forest);">A</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Alré S.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 5.0</span><span>(1)</span><span>•</span><span>32.1 km</span><span>•</span><span>1 hr resp.</span></div>
+            <div class="service-tags">
+              <span class="stag house">Drop-in visits</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sitter-card">
+          <div class="trust-ring">
+            <svg width="32" height="32"><circle cx="16" cy="16" r="13" stroke="#E7E2D8" stroke-width="3" fill="none"/><circle cx="16" cy="16" r="13" stroke="#D9A441" stroke-width="3" fill="none" stroke-dasharray="82" stroke-dashoffset="65" stroke-linecap="round" transform="rotate(-90 16 16)"/></svg>
+            41
+          </div>
+          <div class="avatar" style="background:#8C7A5B;">J</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Justine V.</span><span class="verified" style="background:var(--muted);">…</span></div>
+            <div class="meta"><span style="color:var(--clay);font-weight:700;">✨ New</span><span>•</span><span>35.9 km</span></div>
+            <div class="service-tags"><span class="stag house">House sitting</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <div class="active"><span class="ic">🏠</span>Home</div>
+      <div><span class="ic">💬</span>Messages</div>
+      <div class="active"><span class="ic">🔍</span>Search</div>
+      <div><span class="ic">⋯</span>More</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label" id="profileNote">Sitter profile — everything from onboarding</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+    <div class="scroll">
+
+      <div class="cover">
+        <div class="back">←</div>
+        <div class="gallery-dots"><span></span><span></span><span></span><span></span></div>
+      </div>
+
+      <div class="profile-head">
+        <div class="p-avatar">Z</div>
+        <div class="p-name-row">
+          <div class="p-name">Zelnice V. <span class="verified" style="width:18px;height:18px;font-size:0.7rem;">✓</span></div>
+          <div class="p-trust">
+            <svg width="44" height="44"><circle cx="22" cy="22" r="18" stroke="#E7E2D8" stroke-width="4" fill="none"/><circle cx="22" cy="22" r="18" stroke="#2C4A3E" stroke-width="4" fill="none" stroke-dasharray="113" stroke-dashoffset="12" stroke-linecap="round" transform="rotate(-90 22 22)"/></svg>
+            92
+          </div>
+        </div>
+        <div class="p-meta"><span class="stars">★ 5.0</span> (1 review) · 16.3 km away · 2 min response time</div>
+
+        <div class="p-badges">
+          <span class="pbadge">✔ ID + Criminal check</span>
+          <span class="pbadge">🩹 First Aid</span>
+          <span class="pbadge">▶ Intro video</span>
+        </div>
+      </div>
+
+      <div class="p-section">
+        <h4>About Zelnice</h4>
+        <p class="body">I've been caring for pets since I was a teenager and now do it full-time. I work from home, so your pet gets company all day, not just quick visits. I treat every animal like my own.</p>
+      </div>
+
+      <div class="p-section">
+        <div class="stat-grid">
+          <div class="stat-box"><div class="num">4</div><div class="lbl">Jobs done</div></div>
+          <div class="stat-box"><div class="num">100%</div><div class="lbl">Acceptance</div></div>
+          <div class="stat-box"><div class="num">6 yrs</div><div class="lbl">Experience</div></div>
+        </div>
+      </div>
+
+      <div class="p-section">
+        <h4>Coverage areas</h4>
+        <div class="row-chip">
+          <span class="rchip on">Moreleta Park</span>
+          <span class="rchip on">Garsfontein</span>
+        </div>
+      </div>
+
+      <div class="p-section">
+        <h4>Services offered</h4>
+        <div class="row-chip">
+          <span class="rchip on">House sitting</span>
+          <span class="rchip on">Drop-in visits</span>
+          <span class="rchip on">Boarding at her home</span>
+          <span class="rchip on">Doggy daycare</span>
+        </div>
+      </div>
+
+      <div class="p-section">
+        <h4>Availability</h4>
+        <p class="body">Works remotely — generally available for daycare and daytime check-ins, not just evenings.</p>
+      </div>
+
+      <div class="p-section">
+        <h4>Comfortable with</h4>
+        <div class="row-chip">
+          <span class="rchip on">Small dogs</span>
+          <span class="rchip on">Medium dogs</span>
+          <span class="rchip on">Large dogs</span>
+          <span class="rchip on">Cats</span>
+        </div>
+        <p class="body" style="margin-top:8px;">Open to all breeds — no exclusions listed.</p>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="p-section">
+        <h4>🏠 Her home (Boarding &amp; Daycare)</h4>
+        <div class="home-box">
+          <div class="home-row"><span>Other pets in home</span><span>1 cat</span></div>
+          <div class="home-row"><span>Yard fully fenced</span><span>Yes</span></div>
+          <div class="home-row"><span>Smoking indoors</span><span>No</span></div>
+          <div class="home-row"><span>Household</span><span>Adults only</span></div>
+        </div>
+      </div>
+
+      <div class="p-section">
+        <h4>Transport &amp; emergencies</h4>
+        <p class="body">Has her own reliable transport and a licensed backup driver on call — verified during onboarding.</p>
+      </div>
+
+      <div class="p-section">
+        <h4>Reviews (1)</h4>
+        <div class="review">
+          <div class="rhead"><span>Nadia P.</span><span class="stars">★★★★★</span></div>
+          <div class="rtext">Amazing sitter, took care of my furchild for a few days. Would recommend.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="book-bar">
+      <div class="book-price"><div class="amt">R300</div><div class="per">per night</div></div>
+      <div class="book-btn">Request booking</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

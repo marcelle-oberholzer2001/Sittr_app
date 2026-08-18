@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Sit Clipboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:40px 16px; }
+  .phone{ width:390px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:700px; }
+
+  .header{ padding:16px 20px 10px; }
+  .header .back{ font-size:0.8rem; color:var(--muted); margin-bottom:8px; }
+  .header h1{ font-family:'Fraunces',serif; font-weight:600; font-size:1.35rem; margin:0 0 4px; }
+  .header .sub{ font-size:0.8rem; color:var(--muted); }
+
+  .synced-note{ margin:8px 20px 4px; background:#E4EEE9; border-radius:12px; padding:11px 13px; font-size:0.75rem; color:var(--forest); font-weight:700; line-height:1.5; }
+
+  .section{ margin:16px 20px 0; }
+  .section-head{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  .section-head .ic{ font-size:1rem; }
+  .section-head h3{ font-family:'Fraunces',serif; font-weight:600; font-size:0.98rem; margin:0; }
+
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 15px; }
+  .fact-row{ display:flex; justify-content:space-between; font-size:0.82rem; padding:6px 0; border-bottom:1px solid var(--line); gap:10px; }
+  .fact-row:last-child{ border-bottom:none; }
+  .fact-row span:first-child{ color:var(--muted); flex-shrink:0; }
+  .fact-row span:last-child{ font-weight:700; text-align:right; }
+
+  .confirm-row{ display:flex; align-items:center; gap:8px; margin-top:10px; padding-top:10px; border-top:1px dashed var(--line); }
+  .confirm-box{ width:20px;height:20px;border-radius:6px; border:1.5px solid var(--forest); display:flex;align-items:center;justify-content:center; font-size:0.7rem; color:var(--forest); flex-shrink:0; cursor:pointer; }
+  .confirm-box.checked{ background:var(--forest); color:#fff; }
+  .confirm-row label{ font-size:0.74rem; color:var(--forest); font-weight:700; margin:0; cursor:pointer; }
+
+  .locked-card{ background:#F1EEE6; border:1.5px dashed var(--line); }
+  .lock-title{ display:flex; align-items:center; gap:6px; font-size:0.72rem; font-weight:800; color:var(--clay); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px; }
+
+  .vet-card{ background:#FDECE3; border:1.5px solid #E8B892; }
+  .vet-card .fact-row span:last-child{ color:#B85C2E; }
+
+  .add-note{ margin-top:10px; }
+  textarea{ width:100%; border:1.5px solid var(--line); border-radius:10px; padding:10px 12px; font-family:'Manrope'; font-size:0.8rem; resize:none; background:#fff; box-sizing:border-box; }
+
+  .footer-note{ margin:22px 20px 24px; text-align:center; font-size:0.76rem; color:var(--muted); line-height:1.5; }
+
+  .persist-tag{ display:inline-flex; align-items:center; gap:5px; background:var(--forest); color:#fff; font-size:0.68rem; font-weight:700; padding:5px 10px; border-radius:20px; margin:0 20px 4px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+  <div class="scroll">
+
+    <div class="header">
+      <div class="back">← Booking with Suzie M.</div>
+      <h1>🐾 Bella's Sit Clipboard</h1>
+      <div class="sub">Overnight · 13–15 Jul · Moreleta Park</div>
+    </div>
+
+    <div class="persist-tag">📌 Available throughout the whole sit</div>
+    <div class="synced-note">Everything below is pulled straight from Suzie's saved profile for Bella — she never has to retype this for you or any future sitter.</div>
+
+    <div class="section">
+      <div class="section-head"><span class="ic">🐕</span><h3>Basics</h3></div>
+      <div class="card">
+        <div class="fact-row"><span>Breed</span><span>French Bulldog</span></div>
+        <div class="fact-row"><span>Age</span><span>3 years</span></div>
+        <div class="fact-row"><span>Size</span><span>Small</span></div>
+        <div class="fact-row"><span>Personality</span><span>Friendly, energetic</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="ic">🍽️</span><h3>Feeding schedule</h3></div>
+      <div class="card">
+        <div class="fact-row"><span>Amount</span><span>1 cup kibble</span></div>
+        <div class="fact-row"><span>Times</span><span>7:00am and 6:00pm</span></div>
+        <div class="fact-row"><span>Allergies</span><span>Chicken</span></div>
+        <div class="confirm-row">
+          <div class="confirm-box checked" onclick="this.classList.toggle('checked')">✓</div>
+          <label>Confirmed with Suzie at meet &amp; greet</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="ic">💊</span><h3>Medication</h3></div>
+      <div class="card">
+        <div class="fact-row"><span>Current medication</span><span>None</span></div>
+        <div class="confirm-row">
+          <div class="confirm-box checked" onclick="this.classList.toggle('checked')">✓</div>
+          <label>Confirmed with Suzie at meet &amp; greet</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="ic">🚶</span><h3>Walking &amp; routine</h3></div>
+      <div class="card">
+        <div class="fact-row"><span>Walks</span><span>30 min, morning &amp; evening</span></div>
+        <div class="fact-row"><span>Sleeping</span><span>Own bed, in the kitchen</span></div>
+        <div class="fact-row"><span>Behaviour notes</span><span>Jumps at the gate, unsure of other dogs</span></div>
+        <div class="confirm-row">
+          <div class="confirm-box" onclick="this.classList.toggle('checked')"></div>
+          <label>Confirmed with Suzie at meet &amp; greet</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="ic">🏥</span><h3>Vet &amp; emergency</h3></div>
+      <div class="card vet-card">
+        <div class="fact-row"><span>Vet clinic</span><span>Centurion Animal Hospital</span></div>
+        <div class="fact-row"><span>Phone</span><span>012 345 6789</span></div>
+        <div class="fact-row"><span>Address</span><span>14 Rooihuiskraal Rd</span></div>
+        <div class="fact-row"><span>Owner emergency contact</span><span>Suzie — 082 111 2222</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="ic">🔑</span><h3>Home access</h3></div>
+      <div class="card locked-card">
+        <div class="lock-title">🔓 Unlocked for this confirmed booking only</div>
+        <div class="fact-row"><span>Gate/access code</span><span>Given at meet &amp; greet</span></div>
+        <div class="fact-row"><span>WiFi password</span><span>BellaHouse2024</span></div>
+        <div class="fact-row"><span>Bin day</span><span>Tuesday</span></div>
+        <div class="fact-row"><span>Other notes</span><span>Cleaner Thursdays, no front gate after 6pm</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-head"><span class="ic">✏️</span><h3>Notes from the meet &amp; greet</h3></div>
+      <div class="card">
+        <div class="add-note">
+          <textarea rows="3" placeholder="Anything Suzie mentioned that isn't already saved above">Keys are under the mat if the gate code doesn't work. Bella barks at the postman but settles fast.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">This clipboard stays available for the whole sit — if you forget anything, it's here. It also saves back to Bella's profile, so it's ready if you (or another sitter) book with her again.</div>
+
+  </div>
+</div>
+</body>
+</html>

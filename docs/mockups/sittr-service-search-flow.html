@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Search by Service, Dates &amp; Location</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E; --forest-deep:#1F3830;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink);
+    display:flex; flex-wrap:wrap; justify-content:center; gap:30px; padding:40px 16px;
+  }
+  .phone{
+    width:390px; max-width:100%; background:var(--paper);
+    border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111;
+    display:flex; flex-direction:column;
+  }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; flex-shrink:0; }
+  .scroll{ overflow-y:auto; max-height:700px; flex:1; }
+  .col-label{ width:390px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:1rem; color:#6b6558; margin-bottom:-14px; }
+
+  /* ===== SEARCH FORM ===== */
+  .header{ padding:20px 20px 4px; }
+  .header h1{ font-family:'Fraunces',serif; font-weight:600; font-size:1.5rem; margin:0 0 6px; }
+  .header p{ font-size:0.84rem; color:var(--muted); margin:0 0 20px; }
+
+  .form-card{ background:var(--card); border:1px solid var(--line); border-radius:20px; margin:0 20px; padding:18px; }
+  .form-field{ margin-bottom:16px; }
+  .form-field label{ font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin-bottom:8px; display:block; }
+  .loc-box{ display:flex; align-items:center; gap:10px; border:1.5px solid var(--line); border-radius:12px; padding:11px 13px; }
+  .loc-box input{ border:none; outline:none; font-family:'Manrope'; font-weight:700; font-size:0.9rem; width:100%; }
+
+  .date-row{ display:flex; gap:8px; }
+  .date-box{ flex:1; border:1.5px solid var(--line); border-radius:12px; padding:10px 12px; }
+  .date-box .dlabel{ font-size:0.65rem; color:var(--muted); font-weight:700; }
+  .date-box .dval{ font-weight:800; font-size:0.9rem; margin-top:2px; }
+
+  .service-grid{ display:flex; flex-wrap:wrap; gap:8px; }
+  .service-opt{ flex-basis:calc(50% - 4px); padding:12px 10px; border-radius:12px; border:1.5px solid var(--line); font-size:0.78rem; font-weight:700; text-align:center; background:#fff; }
+  .service-opt.selected{ background:var(--forest); border-color:var(--forest); color:#fff; }
+
+  .search-btn{ margin:20px; background:var(--forest); color:#fff; font-weight:700; padding:15px; border-radius:14px; text-align:center; font-size:0.94rem; }
+
+  .match-logic{ margin:14px 20px 0; background:#E4EEE9; border-radius:14px; padding:14px; font-size:0.76rem; color:var(--forest); line-height:1.5; }
+  .match-logic b{ display:block; margin-bottom:4px; font-size:0.72rem; letter-spacing:0.04em; text-transform:uppercase; }
+
+  /* ===== RESULTS ===== */
+  .results-header{ padding:16px 20px 6px; }
+  .results-header .query{ font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; }
+  .results-header .sub{ font-size:0.78rem; color:var(--muted); margin-top:3px; }
+  .edit-pill{ display:inline-flex; align-items:center; gap:5px; font-size:0.7rem; font-weight:700; color:var(--forest); background:#E4EEE9; border-radius:20px; padding:5px 10px; margin-top:8px; }
+
+  .list{ padding:12px 14px 20px; display:flex; flex-direction:column; gap:12px; }
+  .sitter-card{ background:var(--card); border:1px solid var(--line); border-radius:20px; padding:14px; display:flex; gap:12px; position:relative; }
+  .avatar{ width:66px;height:66px;border-radius:16px; display:flex;align-items:center;justify-content:center; font-family:'Fraunces',serif;font-weight:600;font-size:1.25rem;color:#fff; flex-shrink:0; }
+  .info{ flex:1; min-width:0; }
+  .name-line{ display:flex; align-items:center; gap:5px; }
+  .name-line .name{ font-family:'Fraunces',serif; font-weight:600; font-size:0.96rem; }
+  .verified{ width:15px;height:15px;border-radius:50%; background:var(--forest);color:#fff; font-size:0.58rem;display:flex;align-items:center;justify-content:center; }
+  .meta{ display:flex; align-items:center; gap:7px; font-size:0.7rem; color:var(--muted); margin-top:3px; flex-wrap:wrap; }
+  .meta .stars{ color:var(--gold); font-weight:700; }
+  .matched-rate{ margin-top:8px; display:flex; align-items:center; justify-content:space-between; background:#F1EEE6; border-radius:10px; padding:7px 10px; }
+  .matched-rate .svc{ font-size:0.72rem; font-weight:700; color:var(--forest); }
+  .matched-rate .amt{ font-family:'Fraunces',serif; font-weight:600; font-size:0.98rem; }
+  .avail-tag{ position:absolute; top:12px; right:12px; font-size:0.62rem; font-weight:800; color:var(--forest); background:#E4EEE9; padding:3px 8px; border-radius:8px; }
+
+  .excluded-note{ margin:4px 14px 16px; text-align:center; font-size:0.74rem; color:var(--muted); background:#F1EEE6; border-radius:12px; padding:10px 14px; line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Suzie's search</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header">
+        <h1>Find a sitter</h1>
+        <p>Tell us what you need — we'll only show sitters who actually match.</p>
+      </div>
+
+      <div class="form-card">
+        <div class="form-field">
+          <label>Location</label>
+          <div class="loc-box">📍<input type="text" value="Centurion, Gauteng"></div>
+        </div>
+
+        <div class="form-field">
+          <label>Dates</label>
+          <div class="date-row">
+            <div class="date-box"><div class="dlabel">FROM</div><div class="dval">13 Jul</div></div>
+            <div class="date-box"><div class="dlabel">TO</div><div class="dval">15 Jul</div></div>
+          </div>
+        </div>
+
+        <div class="form-field" style="margin-bottom:0;">
+          <label>What kind of care?</label>
+          <div class="service-grid">
+            <div class="service-opt">1x daily visit</div>
+            <div class="service-opt">2x daily visits</div>
+            <div class="service-opt">Daytime pet sit</div>
+            <div class="service-opt selected">Overnight / sleepover</div>
+            <div class="service-opt">Dog walking</div>
+            <div class="service-opt">Boarding</div>
+            <div class="service-opt">Doggy daycare</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="match-logic">
+        <b>How matching works</b>
+        Only sitters who (1) cover Centurion, (2) offer "Overnight / sleepover," and (3) have no other booking on 13–15 Jul will appear — and you'll only see their sleepover rate, not their other prices.
+      </div>
+
+      <div class="search-btn">Search sitters →</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — Matching results</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+    <div class="scroll">
+      <div class="results-header">
+        <div class="query">Overnight sitters · Centurion</div>
+        <div class="sub">13 – 15 July (2 nights)</div>
+        <div class="edit-pill">✏️ Edit search</div>
+      </div>
+
+      <div class="list">
+
+        <div class="sitter-card">
+          <span class="avail-tag">✓ Free 13–15</span>
+          <div class="avatar" style="background:var(--clay);">Z</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Zelnice V.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 5.0</span><span>•</span><span>16.3 km</span><span>•</span><span>92 trust</span></div>
+            <div class="matched-rate">
+              <span class="svc">🌙 Overnight rate</span>
+              <span class="amt">R300<span style="font-size:0.6rem;font-weight:600;color:var(--muted);">/night</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sitter-card">
+          <span class="avail-tag">✓ Free 13–15</span>
+          <div class="avatar" style="background:var(--forest);">P</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Pieter K.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 4.8</span><span>•</span><span>9.1 km</span><span>•</span><span>85 trust</span></div>
+            <div class="matched-rate">
+              <span class="svc">🌙 Overnight rate</span>
+              <span class="amt">R350<span style="font-size:0.6rem;font-weight:600;color:var(--muted);">/night</span></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="sitter-card">
+          <span class="avail-tag">✓ Free 13–15</span>
+          <div class="avatar" style="background:#8C7A5B;">N</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Nadia R.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 5.0</span><span>•</span><span>21.4 km</span><span>•</span><span>78 trust</span></div>
+            <div class="matched-rate">
+              <span class="svc">🌙 Overnight rate</span>
+              <span class="amt">R275<span style="font-size:0.6rem;font-weight:600;color:var(--muted);">/night</span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="excluded-note">
+        3 more sitters cover Centurion but don't offer overnight (drop-ins/daycare only) — hidden from this search, but they'll show up if Suzie searches those services instead.
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

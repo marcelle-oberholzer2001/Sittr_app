@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Browse Sitters</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+  :root{
+    --paper:#F7F5F1;
+    --ink:#1F2A24;
+    --forest:#2C4A3E;
+    --forest-light:#3E6152;
+    --clay:#C77A4E;
+    --gold:#D9A441;
+    --card:#FFFFFF;
+    --line:#E7E2D8;
+    --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#E9E5DC;
+    font-family:'Manrope',sans-serif;
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:40px 16px;
+  }
+  .phone{
+    width:390px;
+    max-width:100%;
+    background:var(--paper);
+    border-radius:38px;
+    overflow:hidden;
+    box-shadow:0 30px 60px rgba(0,0,0,0.18);
+    border:8px solid #111;
+  }
+  .statusbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:14px 22px 6px;
+    font-size:13px;
+    font-weight:700;
+    color:var(--ink);
+  }
+
+  /* header / search */
+  .header{
+    padding:6px 18px 14px;
+    background:var(--paper);
+  }
+  .title-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .title-row h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:1.5rem;
+    margin:0;
+  }
+  .title-row .trust-pill{
+    font-size:0.68rem;
+    font-weight:700;
+    color:var(--forest);
+    background:#E4EEE9;
+    border-radius:20px;
+    padding:5px 10px;
+    letter-spacing:0.02em;
+  }
+  .search-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:12px 14px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    box-shadow:0 2px 8px rgba(31,42,36,0.04);
+  }
+  .search-card .icon{ font-size:1.1rem; color:var(--forest); }
+  .search-card .fields{ flex:1; }
+  .search-card .loc{ font-weight:700; font-size:0.92rem; }
+  .search-card .sub{ font-size:0.76rem; color:var(--muted); margin-top:2px; }
+  .map-btn{
+    width:38px;height:38px;border-radius:12px;
+    background:var(--forest);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:1rem;flex-shrink:0;
+  }
+
+  /* filter chips */
+  .chips{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    padding:14px 18px 4px;
+    scrollbar-width:none;
+  }
+  .chips::-webkit-scrollbar{ display:none; }
+  .chip{
+    flex-shrink:0;
+    padding:7px 13px;
+    border-radius:20px;
+    font-size:0.75rem;
+    font-weight:700;
+    border:1px solid var(--line);
+    background:var(--card);
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .chip.active{
+    background:var(--forest);
+    border-color:var(--forest);
+    color:#fff;
+  }
+
+  /* list */
+  .list{
+    padding:10px 14px 28px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .sitter-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:20px;
+    padding:14px;
+    display:flex;
+    gap:12px;
+    position:relative;
+  }
+  .avatar-wrap{
+    position:relative;
+    flex-shrink:0;
+  }
+  .avatar{
+    width:74px;height:74px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif;font-weight:600;font-size:1.4rem;color:#fff;
+  }
+  .video-dot{
+    position:absolute;
+    bottom:-5px;left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;
+    font-size:0.55rem;font-weight:700;
+    padding:2px 6px;border-radius:8px;
+    display:flex;align-items:center;gap:3px;
+    white-space:nowrap;
+  }
+  .info{ flex:1; min-width:0; }
+  .info .row1{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:8px;
+  }
+  .name-line{ display:flex; align-items:center; gap:5px; }
+  .name-line .name{ font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; }
+  .verified{
+    width:16px;height:16px;border-radius:50%;
+    background:var(--forest);color:#fff;
+    font-size:0.62rem;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+  }
+  .price{ text-align:right; flex-shrink:0; }
+  .price .amt{ font-weight:800; font-size:0.98rem; }
+  .price .per{ font-size:0.66rem; color:var(--muted); }
+
+  .meta{
+    display:flex; align-items:center; gap:10px;
+    font-size:0.74rem; color:var(--muted);
+    margin-top:4px; flex-wrap:wrap;
+  }
+  .meta .stars{ color:var(--gold); font-weight:700; }
+  .meta span.dot{ opacity:0.5; }
+
+  .badge-row{
+    display:flex; gap:5px; margin-top:8px; flex-wrap:wrap;
+  }
+  .badge{
+    font-size:0.66rem; font-weight:700;
+    background:#F1EEE6; color:var(--forest);
+    border-radius:8px; padding:3px 7px;
+    display:flex; align-items:center; gap:3px;
+  }
+
+  .trust-ring{
+    position:absolute;
+    top:12px; right:12px;
+    width:34px;height:34px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:0.66rem;font-weight:800;color:var(--forest);
+  }
+  .trust-ring svg{ position:absolute; top:0; left:0; }
+
+  .stats-line{
+    font-size:0.7rem; color:var(--muted); margin-top:6px;
+  }
+  .stats-line b{ color:var(--ink); }
+
+  .tabbar{
+    display:flex;
+    border-top:1px solid var(--line);
+    background:var(--card);
+    padding:10px 0 22px;
+  }
+  .tabbar div{
+    flex:1; text-align:center; font-size:0.65rem; font-weight:700; color:var(--muted);
+  }
+  .tabbar div.active{ color:var(--forest); }
+  .tabbar .ic{ font-size:1.1rem; display:block; margin-bottom:2px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+
+  <div class="header">
+    <div class="title-row">
+      <h1>Find a sitter</h1>
+      <span class="trust-pill">🛡 Verified network</span>
+    </div>
+    <div class="search-card">
+      <span class="icon">📍</span>
+      <div class="fields">
+        <div class="loc">Centurion, Gauteng</div>
+        <div class="sub">Add dates · Add pets</div>
+      </div>
+      <div class="map-btn">🗺</div>
+    </div>
+  </div>
+
+  <div class="chips">
+    <div class="chip active">All sitters</div>
+    <div class="chip">✔ Verified</div>
+    <div class="chip">🩹 First Aid</div>
+    <div class="chip">🐱 Cat specialist</div>
+    <div class="chip">🐶 House sitting</div>
+    <div class="chip">Available today</div>
+  </div>
+
+  <div class="list">
+
+    <!-- Card 1 -->
+    <div class="sitter-card">
+      <div class="trust-ring">
+        <svg width="34" height="34"><circle cx="17" cy="17" r="14" stroke="#E7E2D8" stroke-width="3" fill="none"/><circle cx="17" cy="17" r="14" stroke="#2C4A3E" stroke-width="3" fill="none" stroke-dasharray="88" stroke-dashoffset="10" stroke-linecap="round" transform="rotate(-90 17 17)"/></svg>
+        92
+      </div>
+      <div class="avatar-wrap">
+        <div class="avatar" style="background:var(--clay);">Z</div>
+        <div class="video-dot">▶ Intro</div>
+      </div>
+      <div class="info">
+        <div class="row1">
+          <div class="name-line">
+            <span class="name">Zelnice V.</span>
+            <span class="verified">✓</span>
+          </div>
+        </div>
+        <div class="meta">
+          <span class="stars">★ 5.0</span><span>(1)</span>
+          <span class="dot">•</span><span>16.3 km</span>
+          <span class="dot">•</span><span>2 min response</span>
+        </div>
+        <div class="stats-line"><b>4</b> jobs done · <b>100%</b> acceptance</div>
+        <div class="badge-row">
+          <span class="badge">✔ ID + Criminal check</span>
+          <span class="badge">🩹 First Aid</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right; margin-top:-40px; margin-right:4px; font-weight:800; font-size:0.95rem;">R300<div style="font-size:0.66rem;color:var(--muted);font-weight:600;">per night</div></div>
+
+    <!-- Card 2 -->
+    <div class="sitter-card">
+      <div class="trust-ring">
+        <svg width="34" height="34"><circle cx="17" cy="17" r="14" stroke="#E7E2D8" stroke-width="3" fill="none"/><circle cx="17" cy="17" r="14" stroke="#2C4A3E" stroke-width="3" fill="none" stroke-dasharray="88" stroke-dashoffset="40" stroke-linecap="round" transform="rotate(-90 17 17)"/></svg>
+        68
+      </div>
+      <div class="avatar-wrap">
+        <div class="avatar" style="background:var(--forest);">A</div>
+      </div>
+      <div class="info">
+        <div class="row1">
+          <div class="name-line">
+            <span class="name">Alré S.</span>
+            <span class="verified">✓</span>
+          </div>
+        </div>
+        <div class="meta">
+          <span class="stars">★ 5.0</span><span>(1)</span>
+          <span class="dot">•</span><span>32.1 km</span>
+          <span class="dot">•</span><span>1 hr response</span>
+        </div>
+        <div class="stats-line"><b>1</b> job done · <b>New sitter</b></div>
+        <div class="badge-row">
+          <span class="badge">✔ ID verified</span>
+          <span class="badge">🐇 Small pets</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right; margin-top:-40px; margin-right:4px; font-weight:800; font-size:0.95rem;">R60<div style="font-size:0.66rem;color:var(--muted);font-weight:600;">per visit</div></div>
+
+    <!-- Card 3 -->
+    <div class="sitter-card">
+      <div class="trust-ring">
+        <svg width="34" height="34"><circle cx="17" cy="17" r="14" stroke="#E7E2D8" stroke-width="3" fill="none"/><circle cx="17" cy="17" r="14" stroke="#D9A441" stroke-width="3" fill="none" stroke-dasharray="88" stroke-dashoffset="70" stroke-linecap="round" transform="rotate(-90 17 17)"/></svg>
+        41
+      </div>
+      <div class="avatar-wrap">
+        <div class="avatar" style="background:#8C7A5B;">J</div>
+        <div class="video-dot">▶ Intro</div>
+      </div>
+      <div class="info">
+        <div class="row1">
+          <div class="name-line">
+            <span class="name">Justine V.</span>
+            <span class="verified" style="background:var(--muted);">…</span>
+          </div>
+        </div>
+        <div class="meta">
+          <span style="color:var(--clay);font-weight:700;">✨ New</span>
+          <span class="dot">•</span><span>35.9 km</span>
+        </div>
+        <div class="stats-line">Verification in progress</div>
+        <div class="badge-row">
+          <span class="badge">🐶 Puppy experience</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:right; margin-top:-40px; margin-right:4px; font-weight:800; font-size:0.95rem;">R300<div style="font-size:0.66rem;color:var(--muted);font-weight:600;">per night</div></div>
+
+  </div>
+
+  <div class="tabbar">
+    <div class="active"><span class="ic">🏠</span>Home</div>
+    <div><span class="ic">💬</span>Messages</div>
+    <div class="active"><span class="ic">🔍</span>Search</div>
+    <div><span class="ic">⋯</span>More</div>
+  </div>
+</div>
+</body>
+</html>

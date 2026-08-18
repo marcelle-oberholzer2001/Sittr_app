@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Owner Onboarding</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E; --forest-deep:#1F3830;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:40px 16px; }
+  .phone{ width:390px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+
+  .topbar{ padding:6px 18px 14px; }
+  .steps{ display:flex; gap:5px; margin-bottom:14px; }
+  .step-dot{ flex:1; height:4px; border-radius:3px; background:var(--line); }
+  .step-dot.done{ background:var(--forest); }
+  .step-dot.current{ background:var(--clay); }
+  .step-label{ font-size:0.7rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+
+  .panel{ display:none; padding:4px 20px 22px; min-height:580px; flex-direction:column; }
+  .panel.active{ display:flex; }
+  h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; margin:6px 0 6px; }
+  .desc{ font-size:0.84rem; color:var(--muted); line-height:1.5; margin-bottom:18px; }
+
+  label{ font-size:0.76rem; font-weight:700; color:var(--ink); margin-bottom:6px; display:block; }
+  .field{ margin-bottom:16px; }
+  input[type=text], input[type=date], input[type=number], select, textarea{
+    width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px;
+    font-family:'Manrope'; font-size:0.9rem; background:#fff; color:var(--ink); resize:none;
+  }
+  .hint{ font-size:0.72rem; color:var(--muted); margin-top:5px; }
+
+  .chip-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .chip{ padding:8px 13px; border-radius:20px; border:1.5px solid var(--line); font-size:0.78rem; font-weight:700; background:#fff; cursor:pointer; }
+  .chip.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+
+  .toggle-row{ display:flex; gap:10px; }
+  .toggle-row .opt{ flex:1; text-align:center; padding:12px; border-radius:12px; border:1.5px solid var(--line); font-weight:700; font-size:0.85rem; background:#fff; cursor:pointer; }
+  .toggle-row .opt.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+
+  .upload-box{ border:1.5px dashed var(--line); border-radius:14px; padding:16px; display:flex; align-items:center; gap:12px; margin-bottom:12px; background:#fff; }
+  .upload-box .ic{ font-size:1.4rem; }
+  .upload-box .txt h4{ margin:0 0 2px; font-size:0.85rem; }
+  .upload-box .txt p{ margin:0; font-size:0.72rem; color:var(--muted); }
+
+  .private-note{ background:#F1EEE6; border-radius:12px; padding:11px 13px; font-size:0.74rem; color:var(--forest); font-weight:700; margin-bottom:14px; display:flex; gap:7px; align-items:flex-start; }
+
+  .section-tag{ font-size:0.68rem; font-weight:800; color:var(--clay); text-transform:uppercase; letter-spacing:0.05em; margin:14px 0 8px; }
+  .section-tag:first-of-type{ margin-top:0; }
+
+  .add-pet-btn{ margin-top:6px; padding:12px; border-radius:12px; border:1.5px dashed var(--line); text-align:center; font-size:0.8rem; font-weight:700; color:var(--forest); }
+
+  .nav{ display:flex; gap:10px; padding:0 20px 24px; }
+  .btn{ flex:1; padding:14px; border-radius:14px; font-weight:700; font-size:0.9rem; text-align:center; cursor:pointer; }
+  .btn.primary{ background:var(--forest); color:#fff; }
+  .btn.ghost{ background:transparent; color:var(--muted); border:1.5px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+
+  <div class="topbar">
+    <div class="steps">
+      <div class="step-dot current"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+    <div class="step-label" id="steplabel">Step 1 of 5 · Your details</div>
+  </div>
+
+  <!-- STEP 1: Owner profile -->
+  <div class="panel active" data-step="1">
+    <h2>A few details about you</h2>
+    <div class="desc">Sitters are trusting you too — a real name and photo builds confidence, same as it does for them.</div>
+    <div class="field">
+      <label>Profile photo</label>
+      <div class="upload-box" style="margin-bottom:0;">
+        <span class="ic">📷</span>
+        <div class="txt"><h4>Add a photo</h4><p>Optional, but sitters respond faster to real profiles</p></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" placeholder="As sitters will see it">
+    </div>
+    <div class="field">
+      <label>Phone number</label>
+      <input type="text" placeholder="082 000 0000">
+    </div>
+    <div class="field">
+      <label>Emergency contact</label>
+      <input type="text" placeholder="Name and phone number">
+      <div class="hint">Used only if a sitter can't reach you during a booking.</div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Home -->
+  <div class="panel" data-step="2">
+    <h2>Your home</h2>
+    <div class="desc">Needed so sitters know where to go, and how to take care of things while they're there.</div>
+    <div class="field">
+      <label>Address</label>
+      <input type="text" placeholder="123 Example Street, Centurion">
+      <div class="hint">Only shared with a sitter once you've confirmed a booking with them — never public.</div>
+    </div>
+
+    <div class="section-tag">For house sitting / drop-ins (optional, unlocks once booked)</div>
+    <div class="field">
+      <label>Alarm code / access instructions</label>
+      <input type="text" placeholder="e.g. gate code, key location">
+    </div>
+    <div class="field">
+      <label>WiFi password</label>
+      <input type="text" placeholder="For overnight sitters">
+    </div>
+    <div class="field">
+      <label>Dustbin day</label>
+      <input type="text" placeholder="e.g. Tuesday">
+    </div>
+    <div class="field">
+      <label>Other household notes</label>
+      <textarea rows="3" placeholder="e.g. cleaner comes Thursdays, don't use the front gate after 6pm"></textarea>
+    </div>
+    <div class="private-note">🔒 Everything in this section only unlocks for the specific sitter you've confirmed — hidden until then, and hidden again after the booking ends.</div>
+  </div>
+
+  <!-- STEP 3: Verification -->
+  <div class="panel" data-step="3">
+    <h2>Verify your identity</h2>
+    <div class="desc">Sitters are letting you into a relationship of trust too — verified owners get faster responses and more sitters willing to accept.</div>
+    <div class="upload-box">
+      <span class="ic">🪪</span>
+      <div class="txt"><h4>ID document</h4><p>Confirms who you are — never shown to sitters, just a verified badge</p></div>
+    </div>
+    <div class="hint" style="margin-top:-4px; margin-bottom:14px;">Owners aren't required to submit a criminal check — sitters are screened more heavily since they're unsupervised with your pet and home.</div>
+  </div>
+
+  <!-- STEP 4: Pet passport -->
+  <div class="panel" data-step="4">
+    <h2>Tell us about your pet</h2>
+    <div class="desc">This becomes your pet's profile — sitters see it before accepting, and it's never typed again for future bookings.</div>
+
+    <div class="field">
+      <label>Pet photo</label>
+      <div class="upload-box" style="margin-bottom:0;">
+        <span class="ic">🐾</span>
+        <div class="txt"><h4>Add a photo</h4><p>Helps sitters recognise them instantly</p></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Name &amp; species</label>
+      <input type="text" placeholder="e.g. Bella — Dog">
+    </div>
+    <label>Size (for dogs)</label>
+    <div class="chip-grid" style="margin-bottom:16px;">
+      <div class="chip on">Small</div>
+      <div class="chip">Medium</div>
+      <div class="chip">Large</div>
+    </div>
+    <div class="field">
+      <label>Breed</label>
+      <input type="text" placeholder="e.g. French Bulldog">
+    </div>
+    <div class="field">
+      <label>Age</label>
+      <input type="text" placeholder="e.g. 3 years">
+    </div>
+
+    <div class="section-tag">Personality</div>
+    <div class="chip-grid" style="margin-bottom:16px;">
+      <div class="chip on">Friendly</div>
+      <div class="chip">Shy</div>
+      <div class="chip on">Energetic</div>
+      <div class="chip">Anxious</div>
+      <div class="chip">Nervous with strangers</div>
+    </div>
+
+    <div class="section-tag">Care routine</div>
+    <div class="field">
+      <label>Feeding schedule</label>
+      <textarea rows="2" placeholder="e.g. 1 cup kibble, 7am and 6pm"></textarea>
+    </div>
+    <div class="field">
+      <label>Medication (if any)</label>
+      <input type="text" placeholder="e.g. none">
+    </div>
+    <div class="field">
+      <label>Allergies</label>
+      <input type="text" placeholder="e.g. chicken">
+    </div>
+    <div class="field">
+      <label>Walking routine</label>
+      <input type="text" placeholder="e.g. 30 min, morning and evening">
+    </div>
+    <div class="field">
+      <label>Behaviour notes</label>
+      <textarea rows="2" placeholder="e.g. jumps at the gate, doesn't like other dogs"></textarea>
+    </div>
+
+    <div class="section-tag">Vet</div>
+    <div class="field">
+      <label>Vet name &amp; number</label>
+      <input type="text" placeholder="Clinic name and phone">
+    </div>
+    <div class="field" style="margin-bottom:0;">
+      <label>Vet address</label>
+      <input type="text" placeholder="For emergencies">
+    </div>
+
+    <div class="add-pet-btn">+ Add another pet</div>
+  </div>
+
+  <!-- STEP 5: Payment -->
+  <div class="panel" data-step="5">
+    <h2>Add a payment method</h2>
+    <div class="desc">You're only charged when a sitter accepts your booking — never before.</div>
+    <div class="field">
+      <label>Card number</label>
+      <input type="text" placeholder="•••• •••• •••• ••••">
+    </div>
+    <div class="field">
+      <label>Expiry</label>
+      <input type="text" placeholder="MM/YY">
+    </div>
+    <div class="hint">You'll always see sitting fee, platform fee, and total before confirming — no hidden charges.</div>
+  </div>
+
+  <div class="nav">
+    <div class="btn ghost" onclick="go(-1)">Back</div>
+    <div class="btn primary" onclick="go(1)">Continue</div>
+  </div>
+</div>
+
+<script>
+  let current = 1;
+  const total = 5;
+  const labels = {1:"Your details",2:"Your home",3:"Verification",4:"Pet passport",5:"Payment"};
+  function render(){
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', +p.dataset.step===current));
+    document.querySelectorAll('.step-dot').forEach((d,i)=>{
+      d.classList.remove('done','current');
+      if(i+1<current) d.classList.add('done');
+      if(i+1===current) d.classList.add('current');
+    });
+    document.getElementById('steplabel').textContent = `Step ${current} of ${total} · ${labels[current]}`;
+  }
+  function go(dir){ current = Math.min(total, Math.max(1, current+dir)); render(); }
+  render();
+</script>
+</body>
+</html>

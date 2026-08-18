@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Sitter Availability Calendar</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:40px 16px; }
+  .phone{ width:390px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:700px; }
+
+  .header{ padding:16px 20px 4px; }
+  .header h1{ font-family:'Fraunces',serif; font-weight:600; font-size:1.35rem; margin:0 0 4px; }
+  .header .sub{ font-size:0.82rem; color:var(--muted); }
+
+  .month-nav{ display:flex; align-items:center; justify-content:space-between; margin:16px 20px 10px; }
+  .month-nav .arrow{ width:34px;height:34px; border-radius:50%; background:var(--card); border:1px solid var(--line); display:flex;align-items:center;justify-content:center; font-size:0.9rem; color:var(--forest); }
+  .month-nav .month-lbl{ font-family:'Fraunces',serif; font-weight:600; font-size:1.05rem; }
+
+  .cal-grid{ margin:0 20px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px; }
+  .dow-row{ display:grid; grid-template-columns:repeat(7,1fr); margin-bottom:8px; }
+  .dow-row span{ text-align:center; font-size:0.66rem; font-weight:800; color:var(--muted); }
+  .days-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:5px; }
+  .day-cell{
+    aspect-ratio:1; border-radius:9px; display:flex; align-items:center; justify-content:center;
+    font-size:0.8rem; font-weight:700; cursor:pointer; position:relative; color:var(--ink); background:#fff;
+    border:1.5px solid var(--line);
+  }
+  .day-cell.empty{ visibility:hidden; }
+  .day-cell.past{ color:var(--line); border-color:transparent; cursor:default; }
+  .day-cell.blocked{ background:#F1EEE6; border-color:#F1EEE6; color:var(--muted); text-decoration:line-through; }
+  .day-cell.booked{ background:var(--forest); border-color:var(--forest); color:#fff; cursor:pointer; }
+  .day-cell.today{ box-shadow:0 0 0 2px var(--clay); }
+
+  .legend{ display:flex; flex-wrap:wrap; gap:14px; margin:16px 20px; }
+  .leg-item{ display:flex; align-items:center; gap:6px; font-size:0.72rem; color:var(--muted); font-weight:700; }
+  .leg-dot{ width:13px;height:13px;border-radius:4px; }
+  .leg-dot.avail{ background:#fff; border:1.5px solid var(--line); }
+  .leg-dot.blocked{ background:#F1EEE6; }
+  .leg-dot.booked{ background:var(--forest); }
+
+  .hint-card{ margin:4px 20px 16px; background:#E4EEE9; border-radius:14px; padding:13px 14px; font-size:0.76rem; color:var(--forest); line-height:1.5; }
+
+  .booking-popup{ margin:0 20px 16px; background:var(--card); border:1.5px solid var(--forest); border-radius:16px; padding:14px; display:none; }
+  .booking-popup.show{ display:block; }
+  .booking-popup h4{ margin:0 0 4px; font-family:'Fraunces',serif; font-size:0.92rem; }
+  .booking-popup p{ margin:0; font-size:0.76rem; color:var(--muted); }
+  .booking-popup .lock-note{ margin-top:8px; font-size:0.7rem; color:var(--clay); font-weight:700; }
+
+  .tap-hint{ text-align:center; font-size:0.74rem; color:var(--muted); margin:0 20px 20px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+  <div class="scroll">
+
+    <div class="header">
+      <h1>Your availability</h1>
+      <div class="sub">Tap any date to block or unblock it. Booked dates lock automatically.</div>
+    </div>
+
+    <div class="month-nav">
+      <div class="arrow">‹</div>
+      <div class="month-lbl">July 2026</div>
+      <div class="arrow">›</div>
+    </div>
+
+    <div class="cal-grid">
+      <div class="dow-row"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+      <div class="days-grid" id="grid"></div>
+    </div>
+
+    <div class="legend">
+      <div class="leg-item"><span class="leg-dot avail"></span>Available</div>
+      <div class="leg-item"><span class="leg-dot blocked"></span>Blocked by you</div>
+      <div class="leg-item"><span class="leg-dot booked"></span>Booked</div>
+    </div>
+
+    <div class="booking-popup" id="popup">
+      <h4>🐾 Overnight — Bella</h4>
+      <p>Booked by Suzie M. · 13–15 July</p>
+      <div class="lock-note">🔒 Locked automatically — can't be edited here. Cancel the booking itself to free these dates.</div>
+    </div>
+
+    <div class="hint-card">💡 These dates feed search directly — if you block 20–22 July, you simply won't appear when an owner searches for a sitter in that window. No need to decline requests you were never going to accept.</div>
+
+    <div class="tap-hint">Tap a white date to block it · tap again to unblock</div>
+  </div>
+</div>
+
+<script>
+  const grid = document.getElementById('grid');
+  const popup = document.getElementById('popup');
+
+  const startOffset = 3;
+  const daysInMonth = 31;
+  const today = 3;
+  const bookedDays = [13,14,15];
+  let blockedDays = new Set([25,26]);
+
+  for(let i=0;i<startOffset;i++){
+    const cell = document.createElement('div');
+    cell.className = 'day-cell empty';
+    grid.appendChild(cell);
+  }
+
+  for(let d=1; d<=daysInMonth; d++){
+    const cell = document.createElement('div');
+    cell.textContent = d;
+    cell.className = 'day-cell';
+    if(d < today) cell.classList.add('past');
+    if(d === today) cell.classList.add('today');
+
+    if(bookedDays.includes(d)){
+      cell.classList.add('booked');
+      cell.onclick = () => { popup.classList.add('show'); };
+    } else if(d >= today){
+      if(blockedDays.has(d)) cell.classList.add('blocked');
+      cell.onclick = () => {
+        popup.classList.remove('show');
+        if(blockedDays.has(d)){ blockedDays.delete(d); cell.classList.remove('blocked'); }
+        else { blockedDays.add(d); cell.classList.add('blocked'); }
+      };
+    }
+    grid.appendChild(cell);
+  }
+</script>
+</body>
+</html>

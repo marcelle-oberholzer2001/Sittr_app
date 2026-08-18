@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — SOS Backup Sitter</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --alert:#C0453A; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:24px; padding:40px 16px; }
+  .phone{ width:355px; max-width:100%; background:var(--paper); border-radius:36px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 20px 4px; font-size:12px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:660px; }
+  .col-label{ width:355px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:0.92rem; color:#6b6558; margin-bottom:-14px; }
+
+  .header{ padding:16px 18px 4px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; margin:0; }
+  .header .sub{ font-size:0.75rem; color:var(--muted); margin-top:3px; }
+
+  .sos-trigger{ margin:16px 18px; background:var(--card); border:1.5px solid var(--line); border-radius:18px; padding:16px; text-align:center; }
+  .sos-icon{ width:56px;height:56px; border-radius:50%; background:#FBEAE8; color:var(--alert); display:flex;align-items:center;justify-content:center; font-size:1.5rem; margin:0 auto 10px; }
+  .sos-trigger h3{ font-family:'Fraunces',serif; font-size:1.05rem; margin:0 0 6px; }
+  .sos-trigger p{ font-size:0.8rem; color:var(--muted); line-height:1.5; margin:0 0 14px; }
+  .reason-chip{ display:block; width:100%; padding:11px; margin-bottom:8px; border-radius:11px; border:1.5px solid var(--line); font-size:0.8rem; font-weight:700; background:#fff; text-align:left; }
+  .reason-chip.selected{ border-color:var(--alert); background:#FBEAE8; color:var(--alert); }
+  .sos-btn{ margin-top:10px; background:var(--alert); color:#fff; font-weight:800; padding:14px; border-radius:13px; text-align:center; font-size:0.86rem; }
+
+  .reassure{ text-align:center; padding:30px 22px 10px; }
+  .reassure .ic{ font-size:2.2rem; }
+  .reassure h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; margin:10px 0 6px; }
+  .reassure p{ font-size:0.82rem; color:var(--muted); line-height:1.55; margin:0; }
+  .status-steps{ margin:20px 18px; }
+  .sstep{ display:flex; gap:10px; padding:10px 0; }
+  .sstep .sdot{ width:22px;height:22px;border-radius:50%; background:var(--forest); color:#fff; font-size:0.68rem; display:flex;align-items:center;justify-content:center; flex-shrink:0; }
+  .sstep.pending .sdot{ background:var(--line); color:var(--muted); }
+  .sstep h4{ margin:0; font-size:0.82rem; }
+  .sstep p{ margin:1px 0 0; font-size:0.7rem; color:var(--muted); }
+
+  .alert-banner{ background:var(--alert); color:#fff; text-align:center; padding:8px; font-size:0.72rem; font-weight:800; letter-spacing:0.04em; }
+  .alert-card{ margin:16px 18px; background:var(--card); border:2px solid var(--alert); border-radius:18px; padding:16px; }
+  .alert-card .top{ display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .alert-card .top .ic{ font-size:1.1rem; }
+  .alert-card .top h4{ margin:0; font-size:0.92rem; color:var(--alert); }
+  .alert-row{ display:flex; justify-content:space-between; font-size:0.8rem; padding:5px 0; border-bottom:1px solid var(--line); }
+  .alert-row:last-of-type{ border-bottom:none; }
+  .alert-row span:first-child{ color:var(--muted); }
+  .alert-row span:last-child{ font-weight:700; }
+  .countdown-bar{ height:6px; background:var(--line); border-radius:4px; margin:12px 0 4px; overflow:hidden; }
+  .countdown-bar .fill{ height:100%; width:62%; background:var(--alert); }
+  .countdown-txt{ font-size:0.68rem; color:var(--alert); font-weight:700; text-align:center; margin-bottom:14px; }
+  .alert-actions{ display:flex; gap:8px; }
+  .aa-btn{ flex:1; padding:12px; border-radius:12px; text-align:center; font-weight:800; font-size:0.8rem; }
+  .aa-btn.accept{ background:var(--forest); color:#fff; }
+  .aa-btn.pass{ background:#fff; border:1.5px solid var(--line); color:var(--muted); }
+
+  .match-card{ margin:16px 18px; background:var(--card); border:1.5px solid var(--forest); border-radius:18px; padding:16px; }
+  .match-top{ display:flex; align-items:center; gap:10px; }
+  .match-top .av{ width:48px;height:48px;border-radius:12px; background:var(--forest); }
+  .match-top .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:0.95rem; }
+  .match-top .sub2{ font-size:0.72rem; color:var(--muted); }
+  .match-btns{ display:flex; gap:8px; margin-top:14px; }
+  .mb{ flex:1; padding:12px; border-radius:12px; text-align:center; font-weight:700; font-size:0.8rem; }
+  .mb.approve{ background:var(--forest); color:#fff; }
+  .mb.wait{ background:#fff; border:1.5px solid var(--line); color:var(--muted); }
+
+  .handoff-note{ margin:16px 18px; background:#E4EEE9; border-radius:14px; padding:14px; font-size:0.78rem; color:var(--forest); line-height:1.55; }
+  .handoff-list{ margin:0 18px; }
+  .ho-item{ display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 13px; margin-bottom:8px; }
+  .ho-item .ic{ font-size:1.1rem; }
+  .ho-item h4{ margin:0; font-size:0.82rem; }
+  .ho-item p{ margin:1px 0 0; font-size:0.7rem; color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Sitter triggers SOS mid-sit</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>14:10</span><span>4G 🔋</span></div>
+    <div class="header"><h2>Bella's sit — Day 2</h2><div class="sub">You're currently sitting for Suzie</div></div>
+    <div class="sos-trigger">
+      <div class="sos-icon">🚨</div>
+      <h3>Request emergency backup</h3>
+      <p>If you can no longer continue this sit, we'll immediately notify nearby verified sitters and keep Suzie updated the whole time.</p>
+      <div class="reason-chip selected">🤒 I'm sick / medical emergency</div>
+      <div class="reason-chip">👪 Family emergency</div>
+      <div class="reason-chip">🚗 Transport fell through</div>
+      <div class="reason-chip">Other</div>
+      <div class="sos-btn">Send SOS now</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — Owner sees this instantly</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>14:11</span><span>4G 🔋</span></div>
+    <div class="reassure">
+      <div class="ic">🐾</div>
+      <h2>We're on it</h2>
+      <p>Zelnice had a medical emergency and can't continue Bella's sit. We've already alerted verified backup sitters near Moreleta Park.</p>
+    </div>
+    <div class="status-steps">
+      <div class="sstep"><div class="sdot">✓</div><div><h4>Zelnice notified us</h4><p>14:11</p></div></div>
+      <div class="sstep"><div class="sdot">✓</div><div><h4>Alert sent to 6 nearby verified sitters</h4><p>14:11</p></div></div>
+      <div class="sstep pending"><div class="sdot">…</div><div><h4>Waiting for a sitter to accept</h4><p>Usually under 15 minutes</p></div></div>
+      <div class="sstep pending"><div class="sdot">4</div><div><h4>You approve before handoff</h4><p>Nothing happens without your OK</p></div></div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">3 — Nearby sitters get alerted</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>14:11</span><span>4G 🔋</span></div>
+    <div class="alert-banner">⚠️ URGENT · SOS BOOKING</div>
+    <div class="alert-card">
+      <div class="top"><span class="ic">🐾</span><h4>Bella needs a sitter today</h4></div>
+      <div class="alert-row"><span>Remaining time</span><span>Today, 2pm – tomorrow 10am</span></div>
+      <div class="alert-row"><span>Location</span><span>Moreleta Park · 3.2 km away</span></div>
+      <div class="alert-row"><span>Pet</span><span>Small dog, friendly, no meds</span></div>
+      <div class="alert-row"><span>You'll earn</span><span>R240 (already paid by owner)</span></div>
+      <div class="alert-row" style="border-bottom:none;"><span></span><span style="font-weight:600; font-size:0.68rem; color:var(--muted);">Zelnice's remaining amount — not your own rate</span></div>
+      <div class="countdown-bar"><div class="fill"></div></div>
+      <div class="countdown-txt">Respond within 4:12</div>
+      <div class="alert-actions">
+        <div class="aa-btn accept">I can help</div>
+        <div class="aa-btn pass">Pass</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">4 — Owner approves the match</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>14:16</span><span>4G 🔋</span></div>
+    <div class="header"><h2>Pieter can take over</h2><div class="sub">Verified · covers Moreleta Park · 5 min away</div></div>
+    <div class="match-card">
+      <div class="match-top">
+        <div class="av"></div>
+        <div><div class="nm">Pieter K.</div><div class="sub2">★ 4.8 · 85 trust · ID + Criminal check ✓</div></div>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); margin:12px 0 0; line-height:1.5;">Pieter has full access to Bella's saved profile and everything Zelnice already logged — nothing needs to be explained again.</p>
+      <div class="match-btns">
+        <div class="mb approve">Approve Pieter</div>
+        <div class="mb wait">See other options</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">5 — Instant handoff, no gaps</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>14:18</span><span>4G 🔋</span></div>
+    <div class="header"><h2>You're all set, Pieter</h2><div class="sub">Bella's sit — remaining time now yours</div></div>
+    <div class="handoff-note">✓ Everything Suzie and Zelnice already saved is unlocked for you immediately — no meet &amp; greet required for an SOS handoff.</div>
+    <div class="handoff-list">
+      <div class="ho-item"><span class="ic">🐾</span><div><h4>Bella's Sit Clipboard</h4><p>Feeding, meds, routine, vet — all there</p></div></div>
+      <div class="ho-item"><span class="ic">📋</span><div><h4>Care timeline so far</h4><p>Breakfast &amp; walk already logged by Zelnice</p></div></div>
+      <div class="ho-item"><span class="ic">🔑</span><div><h4>Home access</h4><p>Gate code &amp; WiFi unlocked for you now</p></div></div>
+      <div class="ho-item"><span class="ic">💬</span><div><h4>Chat with Suzie</h4><p>Opened automatically — say hello</p></div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

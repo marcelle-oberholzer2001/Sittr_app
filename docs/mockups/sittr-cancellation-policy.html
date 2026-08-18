@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Cancel Booking</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:26px; padding:40px 16px; }
+  .phone{ width:380px; max-width:100%; background:var(--paper); border-radius:36px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 20px 4px; font-size:12px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:680px; }
+  .col-label{ width:380px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:0.95rem; color:#6b6558; margin-bottom:-14px; }
+
+  .header{ padding:16px 18px 4px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; margin:0; }
+  .header .sub{ font-size:0.78rem; color:var(--muted); margin-top:4px; }
+
+  .booking-mini{ margin:14px 18px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px; display:flex; align-items:center; gap:11px; }
+  .booking-mini .av{ width:44px;height:44px;border-radius:12px; background:var(--clay); flex-shrink:0; }
+  .booking-mini .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:0.9rem; }
+  .booking-mini .sub2{ font-size:0.72rem; color:var(--muted); margin-top:2px; }
+
+  .countdown{ margin:0 18px 16px; text-align:center; background:#E4EEE9; border-radius:16px; padding:16px; }
+  .countdown .num{ font-family:'Fraunces',serif; font-weight:600; font-size:1.6rem; color:var(--forest); }
+  .countdown .lbl{ font-size:0.74rem; color:var(--forest); font-weight:700; margin-top:2px; }
+
+  .policy-card{ margin:0 18px 14px; background:var(--card); border:1px solid var(--line); border-radius:16px; overflow:hidden; }
+  .policy-tier{ padding:13px 15px; display:flex; gap:11px; border-bottom:1px solid var(--line); }
+  .policy-tier:last-child{ border-bottom:none; }
+  .policy-tier .dot{ width:9px;height:9px;border-radius:50%; margin-top:5px; flex-shrink:0; }
+  .policy-tier.active .dot{ background:var(--forest); }
+  .policy-tier.inactive .dot{ background:var(--line); }
+  .policy-tier h4{ margin:0 0 3px; font-size:0.84rem; }
+  .policy-tier p{ margin:0; font-size:0.74rem; color:var(--muted); line-height:1.45; }
+  .policy-tier.active{ background:#F1EEE6; }
+  .now-tag{ margin-left:auto; font-size:0.6rem; font-weight:800; color:var(--forest); background:#fff; padding:2px 7px; border-radius:6px; align-self:flex-start; }
+
+  .refund-box{ margin:0 18px 16px; background:#fff; border:1.5px dashed var(--line); border-radius:14px; padding:14px; }
+  .refund-row{ display:flex; justify-content:space-between; font-size:0.82rem; padding:4px 0; }
+  .refund-row.total{ border-top:1px solid var(--line); margin-top:6px; padding-top:9px; font-weight:800; }
+
+  .cancel-btn{ margin:0 18px; background:#fff; border:1.5px solid var(--clay); color:var(--clay); font-weight:700; padding:15px; border-radius:14px; text-align:center; font-size:0.88rem; }
+  .keep-btn{ margin:10px 18px 0; background:var(--forest); color:#fff; font-weight:700; padding:15px; border-radius:14px; text-align:center; font-size:0.88rem; }
+
+  .reuse-note{ margin:18px 18px 20px; text-align:center; font-size:0.76rem; color:var(--muted); line-height:1.5; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">Outside 72 hrs — free to cancel</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h2>Cancel booking</h2><div class="sub">Overnight sleepover with Zelnice V.</div></div>
+
+      <div class="booking-mini">
+        <div class="av"></div>
+        <div><div class="nm">Zelnice V.</div><div class="sub2">13 – 15 Jul · Bella (small dog)</div></div>
+      </div>
+
+      <div class="countdown">
+        <div class="num">6 days</div>
+        <div class="lbl">until the sit starts</div>
+      </div>
+
+      <div class="policy-card">
+        <div class="policy-tier active">
+          <div class="dot"></div>
+          <div><h4>More than 72 hours before</h4><p>Free cancellation, full amount refunded.</p></div>
+          <div class="now-tag">YOU ARE HERE</div>
+        </div>
+        <div class="policy-tier inactive">
+          <div class="dot"></div>
+          <div><h4>Within 72 hours</h4><p>50% goes to the sitter as compensation — she's likely turned down other bookings for this date. The rest is refunded to you.</p></div>
+        </div>
+      </div>
+
+      <div class="refund-box">
+        <div class="refund-row"><span>Amount paid</span><span>R690</span></div>
+        <div class="refund-row total"><span>Refund if you cancel now</span><span>R690</span></div>
+      </div>
+
+      <div class="cancel-btn">Cancel &amp; get a full refund</div>
+      <div class="keep-btn">Keep booking</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">Inside 72 hrs — partial forfeited</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h2>Cancel booking</h2><div class="sub">Overnight sleepover with Zelnice V.</div></div>
+
+      <div class="booking-mini">
+        <div class="av"></div>
+        <div><div class="nm">Zelnice V.</div><div class="sub2">13 – 15 Jul · Bella (small dog)</div></div>
+      </div>
+
+      <div class="countdown" style="background:#F3E3D6;">
+        <div class="num" style="color:var(--clay);">38 hours</div>
+        <div class="lbl" style="color:var(--clay);">until the sit starts</div>
+      </div>
+
+      <div class="policy-card">
+        <div class="policy-tier inactive">
+          <div class="dot"></div>
+          <div><h4>More than 72 hours before</h4><p>Free cancellation, full amount refunded.</p></div>
+        </div>
+        <div class="policy-tier active">
+          <div class="dot"></div>
+          <div><h4>Within 72 hours</h4><p>50% goes to the sitter as compensation — she's likely turned down other bookings for this date. The rest is refunded to you.</p></div>
+          <div class="now-tag">YOU ARE HERE</div>
+        </div>
+      </div>
+
+      <div class="refund-box">
+        <div class="refund-row"><span>Amount paid</span><span>R690</span></div>
+        <div class="refund-row"><span>Goes to Zelnice (compensation)</span><span>R345</span></div>
+        <div class="refund-row total"><span>Your refund</span><span>R345</span></div>
+      </div>
+
+      <div class="cancel-btn">Cancel anyway (partial refund)</div>
+      <div class="keep-btn">Keep booking</div>
+
+      <div class="reuse-note">If you cancel, we'll help you request a different available sitter for the same dates — but Zelnice's compensation isn't recoverable.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

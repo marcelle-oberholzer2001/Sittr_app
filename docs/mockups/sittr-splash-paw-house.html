@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Splash with Paw-House Loader</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&display=swap');
+  :root{
+    --paper:#F7F5F1; --forest:#1F3830; --lit:#F7F5F1; --dim:#4C6B5B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#E9E5DC; font-family:sans-serif;
+    display:flex; justify-content:center; align-items:center; min-height:100vh; padding:40px 16px;
+  }
+  .phone{
+    width:390px; max-width:100%; height:780px;
+    background:var(--forest);
+    border-radius:38px; overflow:hidden; position:relative;
+    box-shadow:0 30px 60px rgba(0,0,0,0.2); border:8px solid #111;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .icon{ width:150px; height:150px; }
+  .toe, .house{ fill:var(--dim); transition:fill 0.35s ease; }
+  .toe.lit, .house.lit{ fill:var(--lit); }
+  .door{ fill:var(--forest); }
+  .brand{
+    margin-top:22px; font-family:'Fraunces',serif; font-weight:600; font-size:1.7rem; color:#F7F5F1;
+  }
+  .brand-sub{
+    margin-top:4px; font-size:0.72rem; color:#9FB0A5; letter-spacing:0.14em; text-transform:uppercase;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+  <svg class="icon" viewBox="0 0 220 220">
+    <ellipse class="toe" id="toeTL" cx="95" cy="90" rx="17" ry="22"/>
+    <ellipse class="toe" id="toeTR" cx="130" cy="90" rx="17" ry="22"/>
+    <ellipse class="toe" id="toeL" cx="68" cy="118" rx="15" ry="19"/>
+    <ellipse class="toe" id="toeR" cx="157" cy="118" rx="15" ry="19"/>
+    <path class="house" id="house"
+      d="M112 108 L156 144 L156 178 C156 184 151 189 145 189 L79 189 C73 189 68 184 68 178 L68 144 Z"/>
+    <path class="door" d="M97 189 L97 158 Q97 148 112 148 Q127 148 127 158 L127 189 Z"/>
+  </svg>
+  <div class="brand">Sittr</div>
+  <div class="brand-sub">Trusted Pet Care</div>
+</div>
+
+<script>
+  const parts = ['toeTL','toeTR','toeL','toeR','house'];
+  let i = 0;
+  function pulse(){
+    parts.forEach(id => document.getElementById(id).classList.remove('lit'));
+    document.getElementById(parts[i]).classList.add('lit');
+    i = (i + 1) % parts.length;
+  }
+  setInterval(pulse, 260);
+  pulse();
+</script>
+</body>
+</html>

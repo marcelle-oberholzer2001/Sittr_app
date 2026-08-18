@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Booking Agreement</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:26px; padding:40px 16px; }
+  .phone{ width:380px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:700px; }
+  .col-label{ width:380px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:0.95rem; color:#6b6558; margin-bottom:-14px; }
+
+  .header{ padding:16px 20px 6px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.25rem; margin:0; }
+  .header .sub{ font-size:0.78rem; color:var(--muted); margin-top:4px; }
+
+  .auto-tag{ margin:0 20px 14px; display:inline-flex; align-items:center; gap:6px; background:#E4EEE9; color:var(--forest); font-size:0.7rem; font-weight:700; padding:6px 11px; border-radius:20px; }
+
+  .sec{ margin:0 20px 12px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 15px; }
+  .sec h4{ margin:0 0 8px; font-size:0.82rem; font-family:'Fraunces',serif; display:flex; align-items:center; gap:6px; }
+  .kv{ display:flex; justify-content:space-between; font-size:0.78rem; padding:4px 0; }
+  .kv span:first-child{ color:var(--muted); }
+  .kv span:last-child{ font-weight:700; text-align:right; }
+  .sec p.body{ font-size:0.78rem; color:#4a4438; line-height:1.5; margin:4px 0 0; }
+
+  .liability{ background:#FBEAE8; border-color:#E8B892; }
+  .liability p{ color:#8a4a2f; }
+
+  .sign-block{ margin:16px 20px 10px; background:var(--card); border:1.5px solid var(--forest); border-radius:16px; padding:16px; }
+  .sign-block .agree-row{ display:flex; align-items:flex-start; gap:10px; margin-bottom:12px; }
+  .checkbox{ width:22px;height:22px;border-radius:6px; border:1.5px solid var(--forest); flex-shrink:0; margin-top:1px; display:flex;align-items:center;justify-content:center; color:#fff; font-size:0.7rem; }
+  .checkbox.checked{ background:var(--forest); }
+  .agree-text{ font-size:0.76rem; color:var(--ink); line-height:1.5; }
+  .agree-text a{ color:var(--forest); font-weight:700; }
+  .sig-input{ border:1.5px dashed var(--line); border-radius:10px; padding:12px; font-family:'Fraunces',serif; font-size:1rem; color:var(--forest); text-align:center; background:#fafaf8; }
+
+  .continue-btn{ margin:6px 20px 20px; background:var(--forest); color:#fff; font-weight:700; padding:15px; border-radius:14px; text-align:center; font-size:0.9rem; }
+
+  .req-card{ margin:14px 18px; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:16px; }
+  .req-row{ display:flex; justify-content:space-between; font-size:0.8rem; padding:6px 0; border-bottom:1px solid var(--line); }
+  .req-row:last-of-type{ border-bottom:none; }
+  .req-row span:first-child{ color:var(--muted); }
+  .req-row span:last-child{ font-weight:700; }
+  .accept-agree{ display:flex; align-items:flex-start; gap:9px; margin:14px 18px; font-size:0.76rem; color:var(--ink); line-height:1.5; }
+  .action-row{ display:flex; gap:8px; margin:0 18px 16px; }
+  .action-btn{ flex:1; padding:13px 8px; border-radius:13px; text-align:center; font-weight:700; font-size:0.8rem; }
+  .action-btn.accept{ background:var(--forest); color:#fff; }
+  .action-btn.decline{ background:#fff; border:1.5px solid var(--line); color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Owner: Review &amp; Sign (before payment)</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h2>Review your booking agreement</h2><div class="sub">With Zelnice V. · 13–15 Jul</div></div>
+      <span class="auto-tag">✨ Auto-filled from your booking — nothing to type</span>
+
+      <div class="sec">
+        <h4>👤 Parties</h4>
+        <div class="kv"><span>Owner</span><span>Suzie M. (verified)</span></div>
+        <div class="kv"><span>Sitter</span><span>Zelnice V. (verified)</span></div>
+      </div>
+
+      <div class="sec">
+        <h4>🐾 Pet &amp; service</h4>
+        <div class="kv"><span>Pet</span><span>Bella (small dog)</span></div>
+        <div class="kv"><span>Service</span><span>Overnight / sleepover</span></div>
+        <div class="kv"><span>Dates</span><span>13–15 Jul (2 nights)</span></div>
+        <div class="kv"><span>Location</span><span>Moreleta Park</span></div>
+      </div>
+
+      <div class="sec">
+        <h4>💳 Payment</h4>
+        <div class="kv"><span>Sitting fee</span><span>R600</span></div>
+        <div class="kv"><span>Platform fee</span><span>R90</span></div>
+        <div class="kv"><span>Total (paid now)</span><span>R690</span></div>
+        <p class="body">Held securely and released to Zelnice 2 days after the sit ends, if nothing is disputed.</p>
+      </div>
+
+      <div class="sec">
+        <h4>↩ Cancellation policy</h4>
+        <p class="body">Free cancellation up to 72 hours before the sit starts. Within 72 hours, R345 (50%) goes to Zelnice as compensation; the remaining R345 is refunded to you.</p>
+      </div>
+
+      <div class="sec">
+        <h4>🚨 Emergency plan</h4>
+        <p class="body">Vet: Centurion Animal Hospital, 012 345 6789. Zelnice has verified transport and a backup driver on file. Sittr's SOS system is available if she cannot continue the sit.</p>
+      </div>
+
+      <div class="sec liability">
+        <h4>⚖️ Liability</h4>
+        <p class="body">Sittr verifies identity and conducts background checks but does not guarantee outcomes and is not an insurer. Both parties acknowledge the inherent risks of pet care arrangements. Full terms in the Sittr Terms of Service.</p>
+      </div>
+
+      <div class="sign-block">
+        <div class="agree-row">
+          <div class="checkbox checked">✓</div>
+          <div class="agree-text">I have read and agree to this booking agreement and Sittr's <a>Terms of Service</a>.</div>
+        </div>
+        <div class="sig-input">Suzie Meyer</div>
+      </div>
+
+      <div class="continue-btn">Agree &amp; continue to payment</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — Sitter: agreement tied to Accept</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>14:02</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h2>New booking request</h2><div class="sub">From Suzie M. — verified owner</div></div>
+
+      <div class="req-card">
+        <div class="req-row"><span>Service</span><span>Overnight / sleepover</span></div>
+        <div class="req-row"><span>Dates</span><span>13 – 15 Jul (2 nights)</span></div>
+        <div class="req-row"><span>You'll earn</span><span>R570 (after commission)</span></div>
+      </div>
+
+      <div class="accept-agree">
+        <div class="checkbox checked">✓</div>
+        <div>By accepting, you agree to the auto-generated booking agreement for this sit, including the cancellation policy and emergency plan shown to Suzie.</div>
+      </div>
+
+      <div class="action-row">
+        <div class="action-btn accept">Accept &amp; agree</div>
+        <div class="action-btn decline">Decline</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

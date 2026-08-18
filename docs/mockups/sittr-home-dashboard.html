@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Home Dashboard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:40px 16px; }
+  .phone{ width:390px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; }
+
+  .top{ padding:14px 20px 6px; display:flex; align-items:center; justify-content:space-between; }
+  .greet h1{ font-family:'Fraunces',serif; font-weight:600; font-size:1.35rem; margin:0; }
+  .greet .sub{ font-size:0.78rem; color:var(--muted); margin-top:2px; }
+  .top-icons{ display:flex; gap:10px; align-items:center; }
+  .bell{ position:relative; width:38px;height:38px; border-radius:50%; background:var(--card); border:1px solid var(--line); display:flex;align-items:center;justify-content:center; font-size:1rem; }
+  .bell .dot{ position:absolute; top:6px; right:7px; width:8px;height:8px; border-radius:50%; background:var(--clay); }
+  .avatar{ width:38px;height:38px;border-radius:50%; background:var(--clay); }
+
+  .live-card{ margin:14px 20px; background:linear-gradient(135deg,#2C4A3E,#1F3830); border-radius:20px; padding:16px 18px; color:#fff; position:relative; overflow:hidden; }
+  .live-badge{ display:inline-flex; align-items:center; gap:5px; font-size:0.66rem; font-weight:800; background:rgba(255,255,255,0.15); padding:4px 9px; border-radius:20px; margin-bottom:8px; }
+  .live-dot{ width:6px;height:6px;border-radius:50%; background:#7CE38B; }
+  .live-card h3{ font-family:'Fraunces',serif; font-weight:600; font-size:1.05rem; margin:0 0 3px; }
+  .live-card p{ font-size:0.78rem; opacity:0.85; margin:0 0 12px; }
+  .live-actions{ display:flex; gap:8px; }
+  .live-btn{ flex:1; text-align:center; padding:9px; border-radius:10px; font-size:0.76rem; font-weight:700; }
+  .live-btn.primary{ background:#fff; color:var(--forest); }
+  .live-btn.ghost{ background:rgba(255,255,255,0.15); color:#fff; }
+
+  .section-label{ margin:18px 20px 8px; font-size:0.72rem; font-weight:800; color:var(--clay); text-transform:uppercase; letter-spacing:0.04em; }
+
+  .upcoming-card{ margin:0 20px 10px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:13px 14px; display:flex; align-items:center; gap:12px; }
+  .upcoming-card .role-tag{ font-size:0.6rem; font-weight:800; padding:2px 7px; border-radius:6px; }
+  .role-tag.owner{ background:#F3E3D6; color:var(--clay); }
+  .role-tag.sitter{ background:#E4EEE9; color:var(--forest); }
+  .upcoming-card .av{ width:40px;height:40px;border-radius:10px; background:var(--forest); flex-shrink:0; }
+  .upcoming-card .txt{ flex:1; }
+  .upcoming-card h4{ margin:0 0 2px; font-size:0.84rem; }
+  .upcoming-card p{ margin:0; font-size:0.72rem; color:var(--muted); }
+  .upcoming-card .chev{ color:var(--muted); }
+
+  .snap-row{ display:flex; gap:10px; margin:0 20px 6px; }
+  .snap-box{ flex:1; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; }
+  .snap-box .lbl{ font-size:0.66rem; color:var(--muted); font-weight:700; text-transform:uppercase; }
+  .snap-box .val{ font-family:'Fraunces',serif; font-weight:600; font-size:1.25rem; margin-top:4px; color:var(--forest); }
+  .snap-box .sub2{ font-size:0.68rem; color:var(--muted); margin-top:2px; }
+
+  .quick-row{ display:flex; gap:10px; margin:16px 20px; }
+  .qbtn{ flex:1; background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:13px 10px; text-align:center; }
+  .qbtn .ic{ font-size:1.2rem; }
+  .qbtn .lbl{ font-size:0.72rem; font-weight:700; margin-top:5px; }
+
+  .feed-item{ margin:0 20px 8px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:11px 13px; display:flex; align-items:center; gap:10px; }
+  .feed-item .ic{ font-size:1rem; width:30px;height:30px;border-radius:9px; background:#F1EEE6; display:flex;align-items:center;justify-content:center; flex-shrink:0; }
+  .feed-item .txt{ flex:1; }
+  .feed-item h4{ margin:0; font-size:0.8rem; }
+  .feed-item p{ margin:1px 0 0; font-size:0.68rem; color:var(--muted); }
+
+  .tabbar{ display:flex; border-top:1px solid var(--line); background:var(--card); padding:10px 0 22px; }
+  .tabbar div{ flex:1; text-align:center; font-size:0.62rem; font-weight:700; color:var(--muted); }
+  .tabbar div.active{ color:var(--forest); }
+  .tabbar .ic{ font-size:1.05rem; display:block; margin-bottom:2px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+
+  <div class="scroll">
+    <div class="top">
+      <div class="greet"><h1>Good evening, Suzie 👋</h1><div class="sub">Here's what's happening</div></div>
+      <div class="top-icons">
+        <div class="bell">🔔<span class="dot"></span></div>
+        <div class="avatar"></div>
+      </div>
+    </div>
+
+    <div class="live-card">
+      <div class="live-badge"><span class="live-dot"></span>LIVE NOW · AS SITTER</div>
+      <h3>You're sitting for Max</h3>
+      <p>Day 1 of 3 · Daytime pet sit for the Coetzee family</p>
+      <div class="live-actions">
+        <div class="live-btn primary">Open clipboard</div>
+        <div class="live-btn ghost">Log an update</div>
+      </div>
+    </div>
+
+    <div class="section-label">Upcoming</div>
+    <div class="upcoming-card">
+      <span class="role-tag owner">OWNER</span>
+      <div class="av" style="background:var(--clay);"></div>
+      <div class="txt"><h4>Bella's overnight with Zelnice</h4><p>Starts in 2 days · 13–15 Jul</p></div>
+      <span class="chev">›</span>
+    </div>
+    <div class="upcoming-card">
+      <span class="role-tag sitter">SITTER</span>
+      <div class="av"></div>
+      <div class="txt"><h4>Drop-in visits for Rosie</h4><p>Starts in 5 days · Suzette P.</p></div>
+      <span class="chev">›</span>
+    </div>
+
+    <div class="snap-row">
+      <div class="snap-box">
+        <div class="lbl">As Sitter</div>
+        <div class="val">83</div>
+        <div class="sub2">Trust score</div>
+      </div>
+      <div class="snap-box">
+        <div class="lbl">Available</div>
+        <div class="val">R1,240</div>
+        <div class="sub2">Ready to withdraw</div>
+      </div>
+    </div>
+
+    <div class="quick-row">
+      <div class="qbtn"><div class="ic">🔍</div><div class="lbl">Find a sitter</div></div>
+      <div class="qbtn"><div class="ic">📅</div><div class="lbl">My availability</div></div>
+      <div class="qbtn"><div class="ic">🐾</div><div class="lbl">Bella's profile</div></div>
+    </div>
+
+    <div class="section-label">Recent activity</div>
+    <div class="feed-item">
+      <span class="ic">✅</span>
+      <div class="txt"><h4>Alré accepted your request</h4><p>Small pets visit · 2 hours ago</p></div>
+    </div>
+    <div class="feed-item">
+      <span class="ic">⭐</span>
+      <div class="txt"><h4>New review from Suzette</h4><p>"Great with Rosie!" · Yesterday</p></div>
+    </div>
+    <div class="feed-item">
+      <span class="ic">💰</span>
+      <div class="txt"><h4>Payout released</h4><p>R399 for Max's visits · 2 days ago</p></div>
+    </div>
+  </div>
+
+  <div class="tabbar">
+    <div class="active"><span class="ic">🏠</span>Home</div>
+    <div><span class="ic">💬</span>Messages</div>
+    <div><span class="ic">🔍</span>Search</div>
+    <div><span class="ic">⋯</span>More</div>
+  </div>
+</div>
+</body>
+</html>

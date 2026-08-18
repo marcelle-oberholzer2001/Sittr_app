@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Booking Request Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:26px; padding:40px 16px; }
+  .phone{ width:365px; max-width:100%; background:var(--paper); border-radius:36px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 20px 4px; font-size:12px; font-weight:700; flex-shrink:0; }
+  .scroll{ overflow-y:auto; flex:1; max-height:660px; }
+  .col-label{ width:365px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:0.95rem; color:#6b6558; margin-bottom:-14px; }
+
+  .header{ padding:16px 18px 4px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; margin:0; }
+  .header .sub{ font-size:0.76rem; color:var(--muted); margin-top:3px; }
+
+  .req-card{ margin:14px 16px; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:16px; }
+  .req-top{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .req-avatar{ width:44px;height:44px;border-radius:12px; background:var(--clay); display:flex;align-items:center;justify-content:center; font-family:'Fraunces',serif;font-weight:600;color:#fff; }
+  .req-top .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:0.95rem; }
+  .req-top .tag{ font-size:0.7rem; color:var(--muted); }
+  .new-badge{ margin-left:auto; background:var(--clay); color:#fff; font-size:0.62rem; font-weight:800; padding:3px 8px; border-radius:8px; }
+
+  .req-row{ display:flex; justify-content:space-between; font-size:0.8rem; padding:6px 0; border-bottom:1px solid var(--line); }
+  .req-row:last-of-type{ border-bottom:none; }
+  .req-row span:first-child{ color:var(--muted); }
+  .req-row span:last-child{ font-weight:700; }
+
+  .pet-mini{ display:flex; align-items:center; gap:10px; background:#F1EEE6; border-radius:12px; padding:10px 12px; margin-top:12px; }
+  .pet-mini .pic{ width:36px;height:36px;border-radius:9px; background:var(--forest); }
+  .pet-mini .txt h4{ margin:0; font-size:0.82rem; }
+  .pet-mini .txt p{ margin:1px 0 0; font-size:0.7rem; color:var(--muted); }
+
+  .action-row{ display:flex; gap:8px; margin:14px 16px 6px; }
+  .action-btn{ flex:1; padding:13px 8px; border-radius:13px; text-align:center; font-weight:700; font-size:0.78rem; }
+  .action-btn.accept{ background:var(--forest); color:#fff; }
+  .action-btn.refer{ background:#fff; border:1.5px solid var(--clay); color:var(--clay); }
+  .action-btn.decline{ background:#fff; border:1.5px solid var(--line); color:var(--muted); }
+
+  .decline-note{ margin:0 16px 16px; font-size:0.72rem; color:var(--muted); text-align:center; line-height:1.5; }
+
+  .refer-search{ margin:14px 16px; display:flex; align-items:center; gap:8px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:11px 13px; font-size:0.84rem; }
+  .refer-list{ padding:0 16px; display:flex; flex-direction:column; gap:10px; }
+  .refer-card{ background:var(--card); border:1px solid var(--line); border-radius:16px; padding:11px; display:flex; align-items:center; gap:10px; }
+  .refer-card .av{ width:40px;height:40px;border-radius:10px; background:var(--forest); flex-shrink:0; }
+  .refer-card .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:0.86rem; }
+  .refer-card .sub2{ font-size:0.68rem; color:var(--muted); }
+  .refer-btn{ margin-left:auto; font-size:0.7rem; font-weight:700; color:var(--forest); border:1.5px solid var(--forest); padding:6px 10px; border-radius:9px; }
+  .refer-note{ margin:14px 16px; font-size:0.72rem; color:var(--muted); background:#F1EEE6; padding:11px 13px; border-radius:12px; line-height:1.5; }
+
+  .celebrate{ text-align:center; padding:22px 20px 4px; }
+  .celebrate .ic{ font-size:2rem; }
+  .celebrate h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.25rem; margin:8px 0 4px; }
+  .celebrate p{ font-size:0.82rem; color:var(--muted); margin:0; }
+
+  .fee-card{ margin:16px; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px; }
+  .fee-row{ display:flex; justify-content:space-between; font-size:0.82rem; padding:6px 0; }
+  .fee-row.total{ border-top:1px solid var(--line); margin-top:6px; padding-top:10px; font-weight:800; font-size:0.92rem; }
+  .fee-row span:first-child{ color:var(--muted); }
+  .fee-row.total span:first-child{ color:var(--ink); }
+
+  .deposit-note{ margin:0 16px 14px; font-size:0.76rem; color:var(--clay); font-weight:700; background:#F3E3D6; padding:10px 13px; border-radius:12px; line-height:1.5; }
+  .pay-btn{ margin:0 16px; background:var(--forest); color:#fff; font-weight:700; padding:15px; border-radius:14px; text-align:center; font-size:0.9rem; }
+
+  .mg-btn{ margin:14px 16px 0; background:#fff; border:1.5px solid var(--forest); color:var(--forest); font-weight:700; padding:14px; border-radius:14px; text-align:center; font-size:0.86rem; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .mg-note{ margin:8px 16px 0; font-size:0.72rem; color:var(--muted); text-align:center; }
+
+  .chat-head{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); }
+  .chat-head .av{ width:38px;height:38px;border-radius:10px; background:var(--clay); }
+  .chat-head .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:0.92rem; }
+  .chat-body{ padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+  .sys-msg{ align-self:center; background:#F1EEE6; color:var(--forest); font-size:0.72rem; font-weight:700; padding:8px 14px; border-radius:12px; text-align:center; max-width:85%; }
+  .bubble{ max-width:78%; padding:10px 13px; border-radius:14px; font-size:0.82rem; line-height:1.4; }
+  .bubble.them{ background:#fff; border:1px solid var(--line); align-self:flex-start; border-bottom-left-radius:4px; }
+  .bubble.me{ background:var(--forest); color:#fff; align-self:flex-end; border-bottom-right-radius:4px; }
+  .chat-input{ margin-top:auto; display:flex; gap:8px; padding:12px 16px 18px; border-top:1px solid var(--line); }
+  .chat-input .box{ flex:1; background:#fff; border:1.5px solid var(--line); border-radius:20px; padding:11px 15px; font-size:0.82rem; color:var(--muted); }
+  .chat-input .send{ width:40px;height:40px;border-radius:50%; background:var(--forest); color:#fff; display:flex;align-items:center;justify-content:center; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Sitter gets the request</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h2>New booking request</h2><div class="sub">Respond within 12 hours to keep your response rate up</div></div>
+
+      <div class="req-card">
+        <div class="req-top">
+          <div class="req-avatar">S</div>
+          <div><div class="nm">Suzie M.</div><div class="tag">Verified owner</div></div>
+          <div class="new-badge">NEW</div>
+        </div>
+        <div class="req-row"><span>Service</span><span>Overnight / sleepover</span></div>
+        <div class="req-row"><span>Dates</span><span>13 – 15 Jul (2 nights)</span></div>
+        <div class="req-row"><span>Location</span><span>Moreleta Park</span></div>
+        <div class="req-row"><span>You'll earn</span><span>R570 (after commission)</span></div>
+
+        <div class="pet-mini">
+          <div class="pic"></div>
+          <div class="txt"><h4>Bella — Small dog</h4><p>Friendly, energetic, no medication</p></div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <div class="action-btn accept">Accept</div>
+        <div class="action-btn refer">Refer someone</div>
+      </div>
+      <div class="action-row" style="margin-top:0;">
+        <div class="action-btn decline" style="flex:none; width:100%;">Decline — I'm fully booked</div>
+      </div>
+      <div class="decline-note">Declining doesn't affect your rating. It only counts against your acceptance rate if you don't respond at all.</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — "Refer someone" opens this</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h2>Refer a sitter</h2><div class="sub">Only verified sitters who cover Moreleta Park are shown</div></div>
+      <div class="refer-search">🔍 Search your network…</div>
+      <div class="refer-list">
+        <div class="refer-card">
+          <div class="av"></div>
+          <div><div class="nm">Pieter K.</div><div class="sub2">✓ Verified · 92 trust · Overnight ✓</div></div>
+          <div class="refer-btn">Refer</div>
+        </div>
+        <div class="refer-card">
+          <div class="av"></div>
+          <div><div class="nm">Nadia R.</div><div class="sub2">✓ Verified · 78 trust · Overnight ✓</div></div>
+          <div class="refer-btn">Refer</div>
+        </div>
+      </div>
+      <div class="refer-note">🐾 Suzie's request goes to them with a note that you referred her — it's a new lead sent to a validated sitter, not a transfer. You stay uninvolved in the booking itself.</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">3 — Owner: accepted → pay in full</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="celebrate">
+        <div class="ic">🎉</div>
+        <h2>Zelnice accepted!</h2>
+        <p>Pay in full to secure your booking — Zelnice is only paid once the sit is complete.</p>
+      </div>
+
+      <div class="fee-card">
+        <div class="fee-row"><span>Sitting fee (2 nights)</span><span>R600</span></div>
+        <div class="fee-row"><span>Platform fee</span><span>R90</span></div>
+        <div class="fee-row total"><span>Total</span><span>R690</span></div>
+      </div>
+
+      <div class="deposit-note">💳 Full payment now: R690. Zelnice never receives it upfront — it's held securely and released to her 2 days after the sit ends, as long as nothing's been disputed.</div>
+
+      <div class="pay-btn">Pay now — R690</div>
+
+      <div class="mg-btn">🤝 Arrange meet &amp; greet</div>
+      <div class="mg-note">Opens a chat with Zelnice so you can find a time that works for both of you.</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">4 — Tapping that opens chat</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="chat-head">
+      <div class="av"></div>
+      <div><div class="nm">Zelnice V.</div><div style="font-size:0.68rem;color:var(--muted);">Usually responds in 2 min</div></div>
+    </div>
+    <div class="chat-body">
+      <div class="sys-msg">Payment received ✓ — you can now arrange a meet &amp; greet before the sit</div>
+      <div class="bubble them">Hi Suzie! Excited to meet Bella 🐾 When works for a quick meet &amp; greet before the 13th?</div>
+      <div class="bubble me">Hey! I'm free Thursday evening or Saturday morning, whatever suits you</div>
+      <div class="bubble them">Saturday morning works great — say 10am at yours?</div>
+    </div>
+    <div class="chat-input">
+      <div class="box">Message Zelnice…</div>
+      <div class="send">➤</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

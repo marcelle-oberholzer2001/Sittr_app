@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Live Sit Updates</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:26px; padding:40px 16px; }
+  .phone{ width:365px; max-width:100%; background:var(--paper); border-radius:36px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; position:relative; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 20px 4px; font-size:12px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:660px; }
+  .col-label{ width:365px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:0.95rem; color:#6b6558; margin-bottom:-14px; }
+
+  .notif-wrap{ padding:60px 16px 0; }
+  .notif{ background:rgba(255,255,255,0.96); border-radius:18px; padding:13px 14px; display:flex; gap:11px; box-shadow:0 10px 30px rgba(0,0,0,0.15); }
+  .notif .icon{ width:36px;height:36px;border-radius:10px; background:var(--forest); display:flex;align-items:center;justify-content:center; font-size:1.1rem; flex-shrink:0; }
+  .notif .txt .app{ font-size:0.68rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.03em; }
+  .notif .txt h4{ margin:2px 0 2px; font-size:0.86rem; }
+  .notif .txt p{ margin:0; font-size:0.78rem; color:#4a4438; line-height:1.4; }
+  .notif .time{ font-size:0.68rem; color:var(--muted); margin-left:auto; flex-shrink:0; }
+
+  .header{ padding:18px 18px 4px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; margin:0; }
+  .header .sub{ font-size:0.78rem; color:var(--muted); margin-top:3px; }
+  .check-list{ padding:14px 18px; display:flex; flex-direction:column; gap:10px; }
+  .check-item{ background:var(--card); border:1.5px solid var(--line); border-radius:14px; padding:13px 14px; display:flex; align-items:center; gap:12px; }
+  .check-item.done{ border-color:var(--forest); background:#F1EEE6; }
+  .check-circle{ width:26px;height:26px;border-radius:50%; border:2px solid var(--line); display:flex;align-items:center;justify-content:center; font-size:0.8rem; flex-shrink:0; }
+  .check-item.done .check-circle{ background:var(--forest); border-color:var(--forest); color:#fff; }
+  .check-item h4{ margin:0; font-size:0.86rem; }
+  .check-item p{ margin:1px 0 0; font-size:0.7rem; color:var(--muted); }
+  .photo-add{ margin-left:auto; font-size:0.68rem; font-weight:700; color:var(--forest); border:1.5px solid var(--forest); padding:5px 9px; border-radius:9px; }
+  .send-update-btn{ margin:6px 18px 18px; background:var(--forest); color:#fff; font-weight:700; padding:14px; border-radius:14px; text-align:center; font-size:0.88rem; }
+
+  .chat-head{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--line); }
+  .chat-head .av{ width:38px;height:38px;border-radius:10px; background:var(--clay); }
+  .chat-head .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:0.92rem; }
+  .chat-body{ padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+  .bubble{ max-width:80%; padding:10px 13px; border-radius:14px; font-size:0.82rem; line-height:1.4; }
+  .bubble.them{ background:#fff; border:1px solid var(--line); align-self:flex-start; border-bottom-left-radius:4px; }
+  .update-card{ align-self:flex-start; max-width:85%; background:#fff; border:1.5px solid var(--forest); border-radius:16px; padding:12px 14px; }
+  .update-card .uh{ display:flex; align-items:center; gap:6px; font-size:0.72rem; font-weight:800; color:var(--forest); margin-bottom:8px; }
+  .update-row{ display:flex; align-items:center; gap:7px; font-size:0.8rem; padding:3px 0; }
+  .update-row .tick{ color:var(--forest); font-weight:800; }
+  .update-photo{ margin-top:8px; height:90px; border-radius:10px; background:repeating-linear-gradient(45deg,#E4EEE9,#E4EEE9 8px,#DCE7E1 8px,#DCE7E1 16px); display:flex;align-items:center;justify-content:center; font-size:1.3rem; }
+
+  .tl-header{ padding:16px 18px 4px; }
+  .tl-header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; margin:0; }
+  .tl-header .sub{ font-size:0.78rem; color:var(--muted); margin-top:3px; }
+  .dl-btn{ margin:10px 18px; background:#fff; border:1.5px solid var(--forest); color:var(--forest); font-weight:700; padding:11px; border-radius:12px; text-align:center; font-size:0.8rem; }
+  .day-label{ margin:16px 18px 8px; font-size:0.72rem; font-weight:800; color:var(--clay); text-transform:uppercase; letter-spacing:0.04em; }
+  .tl-item{ margin:0 18px 10px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:11px 13px; display:flex; gap:10px; align-items:flex-start; }
+  .tl-item .dot{ width:8px;height:8px;border-radius:50%; background:var(--forest); margin-top:6px; flex-shrink:0; }
+  .tl-item .txt{ flex:1; }
+  .tl-item .txt .t{ font-size:0.68rem; color:var(--muted); font-weight:700; }
+  .tl-item .txt h4{ margin:2px 0 0; font-size:0.82rem; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Scheduled nudge</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>7:02</span><span>4G 🔋</span></div>
+    <div class="notif-wrap">
+      <div class="notif">
+        <div class="icon">🐾</div>
+        <div class="txt">
+          <div class="app">SITTR</div>
+          <h4>Breakfast time for Bella</h4>
+          <p>Tap to log it — Suzie gets an update automatically.</p>
+        </div>
+        <div class="time">now</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — Quick checklist, not a blank box</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>7:03</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h2>Update Suzie</h2><div class="sub">Bella · Day 1 of 2</div></div>
+      <div class="check-list">
+        <div class="check-item done">
+          <div class="check-circle">✓</div>
+          <div style="flex:1;"><h4>Breakfast</h4><p>1 cup kibble, as saved on her profile</p></div>
+        </div>
+        <div class="check-item">
+          <div class="check-circle"></div>
+          <div style="flex:1;"><h4>Morning walk</h4><p>~30 min</p></div>
+        </div>
+        <div class="check-item">
+          <div class="check-circle"></div>
+          <div style="flex:1;"><h4>Add a photo</h4><p>Optional, but owners love these</p></div>
+          <div class="photo-add">📷 Add</div>
+        </div>
+      </div>
+    </div>
+    <div class="send-update-btn">Send update to Suzie</div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">3 — Posts as a card in chat</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>7:04</span><span>4G 🔋</span></div>
+    <div class="chat-head">
+      <div class="av"></div>
+      <div><div class="nm">Zelnice V.</div><div style="font-size:0.68rem;color:var(--muted);">Sitting for Bella</div></div>
+    </div>
+    <div class="chat-body">
+      <div class="bubble them">Morning! Bella slept great 🐾</div>
+      <div class="update-card">
+        <div class="uh">🐾 SIT UPDATE · 7:04am</div>
+        <div class="update-row"><span class="tick">✓</span><span>Breakfast — 1 cup kibble</span></div>
+        <div class="update-photo">🖼️</div>
+      </div>
+      <div class="bubble them">She's very food motivated this morning 😄</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">4 — Structured care timeline</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="tl-header"><h2>Bella's care timeline</h2><div class="sub">Overnight sit · 13–15 Jul</div></div>
+      <div class="dl-btn">⬇ Download full journal (PDF)</div>
+
+      <div class="day-label">Day 1 — 13 July</div>
+      <div class="tl-item"><div class="dot"></div><div class="txt"><div class="t">7:04 AM</div><h4>Breakfast ✓ — 1 cup kibble, with photo</h4></div></div>
+      <div class="tl-item"><div class="dot"></div><div class="txt"><div class="t">7:35 AM</div><h4>Morning walk ✓ — 30 min</h4></div></div>
+      <div class="tl-item"><div class="dot"></div><div class="txt"><div class="t">6:10 PM</div><h4>Dinner ✓ — 1 cup kibble</h4></div></div>
+
+      <div class="day-label">Day 2 — 14 July</div>
+      <div class="tl-item"><div class="dot"></div><div class="txt"><div class="t">7:12 AM</div><h4>Breakfast ✓ — 1 cup kibble, with photo</h4></div></div>
+      <div class="tl-item"><div class="dot" style="background:var(--clay);"></div><div class="txt"><div class="t">7:40 AM</div><h4>Morning walk — not yet logged</h4></div></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

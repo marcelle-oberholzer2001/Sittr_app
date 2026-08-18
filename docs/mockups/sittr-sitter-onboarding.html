@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Sitter Onboarding</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E; --forest-deep:#1F3830;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink);
+    display:flex; justify-content:center; padding:40px 16px;
+  }
+  .phone{
+    width:390px; max-width:100%; background:var(--paper);
+    border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111;
+  }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+
+  .topbar{ padding:6px 18px 14px; }
+  .steps{ display:flex; gap:5px; margin-bottom:14px; }
+  .step-dot{ flex:1; height:4px; border-radius:3px; background:var(--line); }
+  .step-dot.done{ background:var(--forest); }
+  .step-dot.current{ background:var(--clay); }
+  .step-dot.skip{ background:repeating-linear-gradient(90deg,var(--line),var(--line) 3px,transparent 3px,transparent 6px); }
+  .step-label{ font-size:0.7rem; color:var(--muted); font-weight:700; text-transform:uppercase; letter-spacing:0.06em; }
+
+  .panel{ display:none; padding:4px 20px 22px; min-height:560px; flex-direction:column; }
+  .panel.active{ display:flex; }
+  h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.4rem; margin:6px 0 6px; }
+  .desc{ font-size:0.84rem; color:var(--muted); line-height:1.5; margin-bottom:18px; }
+
+  label{ font-size:0.76rem; font-weight:700; color:var(--ink); margin-bottom:6px; display:block; }
+  .field{ margin-bottom:16px; }
+  input[type=text], input[type=date], input[type=number], select{
+    width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px;
+    font-family:'Manrope'; font-size:0.9rem; background:#fff; color:var(--ink);
+  }
+  .hint{ font-size:0.72rem; color:var(--muted); margin-top:5px; }
+  .hint.flag{ color:var(--clay); font-weight:700; }
+
+  .chip-grid{ display:flex; flex-wrap:wrap; gap:8px; margin-top:6px; }
+  .chip-grid.stacked{ flex-direction:column; }
+  .chip{ padding:8px 13px; border-radius:20px; border:1.5px solid var(--line); font-size:0.78rem; font-weight:700; background:#fff; cursor:pointer; }
+  .chip-grid.stacked .chip{ width:100%; border-radius:12px; text-align:left; }
+  .chip.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+  .chip.clay.on{ background:var(--clay); border-color:var(--clay); }
+
+  .toggle-row{ display:flex; gap:10px; }
+  .toggle-row .opt{
+    flex:1; text-align:center; padding:12px; border-radius:12px; border:1.5px solid var(--line);
+    font-weight:700; font-size:0.85rem; background:#fff; cursor:pointer;
+  }
+  .toggle-row .opt.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+
+  .map-preview{
+    height:130px; border-radius:16px; background:
+      repeating-linear-gradient(45deg,#E4EEE9,#E4EEE9 10px,#DCE7E1 10px,#DCE7E1 20px);
+    display:flex; align-items:center; justify-content:center; margin-bottom:14px; position:relative;
+  }
+  .pin{ font-size:1.8rem; }
+  .private-tag{
+    position:absolute; top:8px; right:8px; background:var(--ink); color:#fff;
+    font-size:0.62rem; font-weight:700; padding:3px 8px; border-radius:8px;
+  }
+
+  .upload-box{
+    border:1.5px dashed var(--line); border-radius:14px; padding:16px; display:flex;
+    align-items:center; gap:12px; margin-bottom:12px; background:#fff;
+  }
+  .upload-box .ic{ font-size:1.4rem; }
+  .upload-box .txt h4{ margin:0 0 2px; font-size:0.85rem; }
+  .upload-box .txt p{ margin:0; font-size:0.72rem; color:var(--muted); }
+  .upload-box.done{ border-style:solid; border-color:var(--forest); }
+  .upload-box.done .status{ margin-left:auto; color:var(--forest); font-weight:800; font-size:0.78rem; }
+  .upload-box.optional{ border-color:var(--gold); background:#FFFBEF; }
+  .optional-divider{ font-size:0.68rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; margin:14px 0 10px; text-align:center; }
+  .badge-pill{ display:inline-block; background:var(--gold); color:#fff; font-size:0.6rem; font-weight:800; padding:2px 8px; border-radius:10px; margin-left:6px; vertical-align:middle; }
+
+  .pending-banner{
+    background:#F3E3D6; color:var(--clay); font-size:0.78rem; font-weight:700;
+    padding:10px 14px; border-radius:12px; margin-top:auto; margin-bottom:8px; text-align:center;
+  }
+  .pending-banner.incentive{ background:#E4EEE9; color:var(--forest); margin-top:0; text-align:left; line-height:1.5; }
+
+  .nav{ display:flex; gap:10px; padding:0 20px 24px; }
+  .btn{ flex:1; padding:14px; border-radius:14px; font-weight:700; font-size:0.9rem; text-align:center; cursor:pointer; }
+  .btn.primary{ background:var(--forest); color:#fff; }
+  .btn.ghost{ background:transparent; color:var(--muted); border:1.5px solid var(--line); }
+
+  .range-row{ display:flex; align-items:center; gap:10px; }
+  input[type=range]{ flex:1; accent-color:var(--forest); }
+  .range-val{ font-weight:800; font-size:0.9rem; min-width:44px; text-align:right; }
+  .rate-row{ display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .rate-toggle{ flex:1.3; padding:11px 13px; border-radius:12px; border:1.5px solid var(--line); font-size:0.8rem; font-weight:700; background:#fff; cursor:pointer; color:var(--muted); }
+  .rate-toggle.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+  .rate-toggle.clay.on{ background:var(--clay); border-color:var(--clay); }
+  .rate-input{ flex:1; display:flex; align-items:center; gap:4px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:9px 10px; }
+  .rate-input.off{ opacity:0.4; }
+  .rate-input span{ font-size:0.78rem; font-weight:700; color:var(--muted); }
+  .rate-input .unit{ font-weight:600; font-size:0.68rem; white-space:nowrap; }
+  .pref-card{ background:#fff; border:1.5px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px; }
+  .pref-head{ font-size:0.86rem; font-weight:700; margin-bottom:8px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .pref-why{ font-size:0.62rem; font-weight:700; color:var(--muted); background:#F1EEE6; padding:2px 8px; border-radius:8px; }
+  .chip-grid.small{ gap:6px; margin-bottom:8px; }
+  .chip-grid.small .chip{ padding:6px 10px; font-size:0.72rem; }
+  .mini-input{ width:100%; padding:9px 11px; border:1.5px solid var(--line); border-radius:10px; font-family:'Manrope'; font-size:0.78rem; background:#fafaf8; box-sizing:border-box; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+
+  <div class="topbar">
+    <div class="steps" id="dots"></div>
+    <div class="step-label" id="steplabel"></div>
+  </div>
+
+  <!-- STEP 1: Coverage areas -->
+  <div class="panel active" data-step="1">
+    <h2>Where can you sit?</h2>
+    <div class="desc">Pick every area you can reach without charging a travel fee. Owners searching in these areas will see your profile.</div>
+    <div class="field">
+      <label>Search suburb / area</label>
+      <input type="text" placeholder="e.g. Moreleta Park">
+    </div>
+    <label>Selected areas (up to 5)</label>
+    <div class="chip-grid">
+      <div class="chip on">Moreleta Park ✕</div>
+      <div class="chip on">Garsfontein ✕</div>
+      <div class="chip">Faerie Glen</div>
+      <div class="chip">Waterkloof</div>
+      <div class="chip">Menlyn</div>
+    </div>
+    <div class="hint">Owners outside these areas won't see you in search — this keeps every job travel-fee free, for you and them.</div>
+  </div>
+
+  <!-- STEP 2: Home address (private) -->
+  <div class="panel" data-step="2">
+    <h2>Confirm your home address</h2>
+    <div class="desc">This is for identity verification only. It's never shown on your public profile — only your coverage areas are visible to owners.</div>
+    <div class="map-preview"><span class="private-tag">🔒 Private</span><span class="pin">📍</span></div>
+    <div class="field">
+      <label>Street address</label>
+      <input type="text" placeholder="123 Example Street">
+    </div>
+    <div class="field">
+      <label>City</label>
+      <input type="text" placeholder="Pretoria">
+    </div>
+  </div>
+
+  <!-- STEP 3: Personal details -->
+  <div class="panel" data-step="3">
+    <h2>A few details about you</h2>
+    <div class="desc">This information is used for verification and matching — most of it stays private.</div>
+    <div class="field">
+      <label>Profile photos</label>
+      <div class="upload-box" style="margin-bottom:0;">
+        <span class="ic">📷</span>
+        <div class="txt"><h4>Add photos</h4><p>Profile photo required · up to 5 more for your gallery</p></div>
+      </div>
+      <div class="hint">Owners are far more likely to book sitters with a clear face photo — this is public, unlike your address.</div>
+    </div>
+    <div class="field">
+      <label>Full legal name</label>
+      <input type="text" placeholder="As it appears on your ID">
+    </div>
+    <div class="field">
+      <label>Date of birth</label>
+      <input type="date">
+      <div class="hint">You must be 18+ to sit on Sittr — no exceptions. If a pet needs emergency vet care, a sitter needs to legally sign for treatment, drive, and be held accountable.</div>
+    </div>
+    <div class="field">
+      <label>Sex (as on your ID)</label>
+      <div class="toggle-row">
+        <div class="opt on">Male</div>
+        <div class="opt">Female</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Work schedule -->
+  <div class="panel" data-step="4">
+    <h2>What's your day-to-day like?</h2>
+    <div class="desc">This helps us match you to bookings that actually fit your schedule — a daycare or a 9am check-in only works if you're free then.</div>
+    <label>Which best describes your work?</label>
+    <div class="chip-grid stacked">
+      <div class="chip on" onclick="toggleRadio(this)">Full-time, 9–5 (office)</div>
+      <div class="chip" onclick="toggleRadio(this)">Full-time, remote / work from home</div>
+      <div class="chip" onclick="toggleRadio(this)">Part-time / flexible hours</div>
+      <div class="chip" onclick="toggleRadio(this)">Student</div>
+      <div class="chip" onclick="toggleRadio(this)">Shift work / irregular hours</div>
+      <div class="chip" onclick="toggleRadio(this)">Not currently working</div>
+      <div class="chip" onclick="toggleRadio(this)">Retired</div>
+    </div>
+  </div>
+
+  <!-- STEP 5: Transport & emergency -->
+  <div class="panel" data-step="5">
+    <h2>Transport &amp; emergencies</h2>
+    <div class="desc">If a pet in your care needs urgent vet attention, we need to know how you'll get them there.</div>
+    <div class="field">
+      <label>Do you have your own reliable transport?</label>
+      <div class="toggle-row">
+        <div class="opt on">Yes</div>
+        <div class="opt">No</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Driver's license</label>
+      <div class="upload-box" style="margin-bottom:0;">
+        <span class="ic">🚗</span>
+        <div class="txt"><h4>Upload license</h4><p>Required if you selected "Yes" above</p></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Emergency backup</label>
+      <div class="toggle-row">
+        <div class="opt">No backup needed</div>
+        <div class="opt on">I have a backup driver</div>
+      </div>
+      <div class="hint">If you don't drive, or your own transport falls through, who can get a pet to the vet on short notice?</div>
+    </div>
+    <div class="field">
+      <label>Emergency contact name &amp; number</label>
+      <input type="text" placeholder="e.g. Mom — 082 000 0000">
+    </div>
+  </div>
+
+  <!-- STEP 6: Verification -->
+  <div class="panel" data-step="6">
+    <h2>Verify your identity</h2>
+    <div class="desc">ID and address are required before you can accept any bookings. This is what owners are trusting when they book you.</div>
+    <div class="upload-box done">
+      <span class="ic">🪪</span>
+      <div class="txt"><h4>ID document</h4><p>Uploaded — under review</p></div>
+      <span class="status">✓</span>
+    </div>
+    <div class="upload-box">
+      <span class="ic">🏠</span>
+      <div class="txt"><h4>Proof of address</h4><p>Utility bill or bank statement, last 3 months</p></div>
+    </div>
+
+    <div class="optional-divider">Optional, but strongly recommended</div>
+
+    <div class="upload-box optional">
+      <span class="ic">🛡️</span>
+      <div class="txt"><h4>Criminal background check <span class="badge-pill">+ Badge</span></h4><p>Via HURU at any PostNet/Jetline — often same-day, from R280</p></div>
+    </div>
+    <div class="pending-banner incentive">✨ Passing this check adds a visible "Background Checked" badge to your profile and meaningfully boosts your Trust Score — owners can filter for it, and it's the single biggest thing you can do to stand out in search.</div>
+
+    <div class="pending-banner">⏳ Your profile stays hidden from search until ID + address are approved (usually 1–3 days)</div>
+  </div>
+
+  <!-- STEP 7: Experience & services -->
+  <div class="panel" data-step="7">
+    <h2>Your experience</h2>
+    <div class="desc">Helps owners find the right match, and unlocks badges on your profile.</div>
+    <div class="field">
+      <label>Years of pet care experience</label>
+      <div class="range-row">
+        <input type="range" min="0" max="20" value="3">
+        <span class="range-val">3 yrs</span>
+      </div>
+    </div>
+    <label>Services you offer &amp; your rates</label>
+    <div class="desc" style="margin-bottom:10px; font-size:0.78rem;">Set your own price per service. Owners searching for a specific service (e.g. "Overnight") will only see your rate for that service.</div>
+
+    <div class="rate-row">
+      <div class="rate-toggle on" onclick="toggleRate(this)">1x daily visit</div>
+      <div class="rate-input"><span>R</span><input type="text" value="80"><span class="unit">/ visit</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle on" onclick="toggleRate(this)">2x daily visits</div>
+      <div class="rate-input"><span>R</span><input type="text" value="140"><span class="unit">/ day</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle" onclick="toggleRate(this)">Daytime pet sit</div>
+      <div class="rate-input off"><span>R</span><input type="text" value="" placeholder="—"><span class="unit">/ day</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle on" onclick="toggleRate(this)">Overnight / sleepover</div>
+      <div class="rate-input"><span>R</span><input type="text" value="300"><span class="unit">/ night</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle" onclick="toggleRate(this)">Dog walking</div>
+      <div class="rate-input off"><span>R</span><input type="text" value="" placeholder="—"><span class="unit">/ walk</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle clay on" id="chip-boarding" onclick="toggleRate(this); toggleService(this)">Boarding at my home</div>
+      <div class="rate-input"><span>R</span><input type="text" value="280"><span class="unit">/ night</span></div>
+    </div>
+    <div class="rate-row">
+      <div class="rate-toggle clay on" id="chip-daycare" onclick="toggleRate(this); toggleService(this)">Doggy daycare</div>
+      <div class="rate-input"><span>R</span><input type="text" value="150"><span class="unit">/ day</span></div>
+    </div>
+
+    <div class="hint flag" id="screen-notice">Boarding / Daycare selected — an extra screening step has been added for your home.</div>
+    <label style="margin-top:12px;">Skills</label>
+    <div class="chip-grid">
+      <div class="chip clay on">🩹 First Aid</div>
+      <div class="chip clay">🐶 Puppy experience</div>
+      <div class="chip clay">🐱 Cat specialist</div>
+      <div class="chip clay">💊 Medication experienced</div>
+    </div>
+  </div>
+
+  <!-- STEP 8: Home screening (conditional) -->
+  <div class="panel" data-step="8">
+    <h2>Home screening</h2>
+    <div class="desc">This step only appears because you selected Boarding or Doggy Daycare — pets will be in your home, around your family and animals, so we screen for that separately.</div>
+    <div class="field">
+      <label>Other pets living in your home</label>
+      <input type="text" placeholder="e.g. 1 cat, 1 medium dog">
+    </div>
+    <div class="field">
+      <label>Other people living in your home</label>
+      <input type="text" placeholder="e.g. spouse, 2 children">
+    </div>
+    <div class="field">
+      <label>Is your yard fully fenced?</label>
+      <div class="toggle-row">
+        <div class="opt on">Yes</div>
+        <div class="opt">No</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Anyone in your household smoke indoors?</label>
+      <div class="toggle-row">
+        <div class="opt">Yes</div>
+        <div class="opt on">No</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Photos of the space pets will stay in</label>
+      <div class="upload-box" style="margin-bottom:0;">
+        <span class="ic">📷</span>
+        <div class="txt"><h4>Upload photos</h4><p>Yard, sleeping area, any barriers/gates</p></div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px;">Daycare note: owners provide their pet's own food for the day — you're not expected to supply it.</div>
+  </div>
+
+  <!-- STEP 9: Pet preferences (per service) -->
+  <div class="panel" data-step="9">
+    <h2>Which pets, for which service?</h2>
+    <div class="desc">Set this separately per service — you might board only small dogs due to space, but be happy walking a large one.</div>
+
+    <div class="pref-card">
+      <div class="pref-head">🏠 Boarding at my home <span class="pref-why">Limited by your space</span></div>
+      <div class="chip-grid small">
+        <div class="chip on">Small dogs</div>
+        <div class="chip on">Medium dogs</div>
+        <div class="chip">Large dogs</div>
+        <div class="chip on">Cats</div>
+      </div>
+      <input type="text" class="mini-input" placeholder="Breeds not comfortable with (optional)">
+    </div>
+
+    <div class="pref-card">
+      <div class="pref-head">☀️ Doggy daycare <span class="pref-why">Limited by your space</span></div>
+      <div class="chip-grid small">
+        <div class="chip on">Small dogs</div>
+        <div class="chip on">Medium dogs</div>
+        <div class="chip">Large dogs</div>
+      </div>
+      <input type="text" class="mini-input" placeholder="Breeds not comfortable with (optional)">
+    </div>
+
+    <div class="pref-card">
+      <div class="pref-head">🌙 Overnight / sleepover <span class="pref-why">At the owner's home</span></div>
+      <div class="chip-grid small">
+        <div class="chip on">Small dogs</div>
+        <div class="chip on">Medium dogs</div>
+        <div class="chip on">Large dogs</div>
+        <div class="chip on">Cats</div>
+      </div>
+      <input type="text" class="mini-input" placeholder="Breeds not comfortable with (optional)">
+    </div>
+
+    <div class="pref-card">
+      <div class="pref-head">📋 1x / 2x daily visits <span class="pref-why">At the owner's home, brief</span></div>
+      <div class="chip-grid small">
+        <div class="chip on">Small dogs</div>
+        <div class="chip on">Medium dogs</div>
+        <div class="chip on">Large dogs</div>
+        <div class="chip on">Cats</div>
+        <div class="chip">Birds</div>
+        <div class="chip">Reptiles</div>
+      </div>
+      <input type="text" class="mini-input" placeholder="Breeds not comfortable with (optional)">
+    </div>
+
+    <div class="hint" style="margin-top:4px;">Leaving a breed field blank signals you're open to all breeds for that service — sitters who welcome breeds others turn away (like bulldogs) tend to get booked fast.</div>
+  </div>
+
+  <!-- STEP 10: Bank details -->
+  <div class="panel" data-step="10">
+    <h2>Where should we send your earnings?</h2>
+    <div class="desc">Required before your first payout — verified against your ID for your protection.</div>
+    <div class="field"><label>Account holder name</label><input type="text" placeholder="As it appears on your account"></div>
+    <div class="field"><label>Bank</label><input type="text" placeholder="e.g. FNB, Capitec, Standard Bank"></div>
+    <div class="field"><label>Account number</label><input type="text" placeholder="•••• •••• ••••"></div>
+    <div class="field"><label>Branch code</label><input type="text" placeholder="e.g. 250655"></div>
+    <div class="hint">🔒 We verify this account matches your ID before releasing any payout — protects you from money ever going to the wrong account.</div>
+  </div>
+
+  <div class="nav">
+    <div class="btn ghost" onclick="go(-1)">Back</div>
+    <div class="btn primary" onclick="go(1)" id="mainNavBtn">Continue</div>
+  </div>
+</div>
+
+<script>
+  let current = 1;
+  let screeningActive = true; // boarding + daycare pre-selected "on" in this demo
+
+  const labels = {
+    1:"Coverage areas", 2:"Home address", 3:"Personal details", 4:"Work schedule",
+    5:"Transport & emergency", 6:"Verification", 7:"Experience & services",
+    8:"Home screening", 9:"Pet preferences", 10:"Bank details"
+  };
+
+  function activeSteps(){
+    const all = [1,2,3,4,5,6,7,8,9,10];
+    return screeningActive ? all : all.filter(s => s !== 8);
+  }
+
+  function renderDots(){
+    const dots = document.getElementById('dots');
+    dots.innerHTML = '';
+    for(let s=1; s<=10; s++){
+      const d = document.createElement('div');
+      d.className = 'step-dot';
+      if(s===8 && !screeningActive) d.classList.add('skip');
+      dots.appendChild(d);
+    }
+  }
+
+  function toggleRate(el){
+    el.classList.toggle('on');
+    const input = el.nextElementSibling;
+    if(input && input.classList.contains('rate-input')){
+      input.classList.toggle('off', !el.classList.contains('on'));
+    }
+  }
+
+  function toggleService(el){
+    el.classList.toggle('on');
+    const boarding = document.getElementById('chip-boarding').classList.contains('on');
+    const daycare = document.getElementById('chip-daycare').classList.contains('on');
+    screeningActive = boarding || daycare;
+    document.getElementById('screen-notice').style.display = screeningActive ? 'block' : 'none';
+    renderDots();
+    render();
+  }
+
+  function toggleRadio(el){
+    el.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  function render(){
+    const steps = activeSteps();
+    if(!steps.includes(current)) current = 7;
+
+    document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', +p.dataset.step===current));
+    const dotEls = document.querySelectorAll('.step-dot');
+    const curIdx = steps.indexOf(current);
+    dotEls.forEach((d,i)=>{
+      const stepNum = i+1;
+      d.classList.remove('done','current');
+      if(stepNum===8 && !screeningActive) return;
+      const idx = steps.indexOf(stepNum);
+      if(idx<curIdx) d.classList.add('done');
+      if(stepNum===current) d.classList.add('current');
+    });
+    const posInFlow = curIdx+1;
+    document.getElementById('steplabel').textContent = `Step ${posInFlow} of ${steps.length} · ${labels[current]}`;
+    document.getElementById('mainNavBtn').textContent = (posInFlow === steps.length) ? 'Finish signup' : 'Continue';
+  }
+
+  function go(dir){
+    const steps = activeSteps();
+    let idx = steps.indexOf(current);
+    idx = Math.min(steps.length-1, Math.max(0, idx+dir));
+    current = steps[idx];
+    render();
+  }
+
+  renderDots();
+  render();
+</script>
+</body>
+</html>

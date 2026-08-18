@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Skip-to-Browse Owner Flow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:30px; padding:40px 16px; }
+  .phone{ width:390px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; position:relative; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; flex-shrink:0; }
+  .scroll{ overflow-y:auto; flex:1; max-height:660px; }
+  .col-label{ width:390px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:1rem; color:#6b6558; margin-bottom:-14px; }
+
+  /* Quick start */
+  .qs-top{ display:flex; justify-content:flex-end; padding:14px 20px 0; }
+  .skip{ font-size:0.82rem; font-weight:700; color:var(--muted); }
+  .qs-content{ padding:16px 22px; text-align:center; }
+  .qs-content h1{ font-family:'Fraunces',serif; font-weight:600; font-size:1.55rem; margin:10px 0 8px; }
+  .qs-content p{ font-size:0.86rem; color:var(--muted); line-height:1.5; margin:0 0 26px; }
+  .qs-form{ text-align:left; background:var(--card); border:1px solid var(--line); border-radius:20px; padding:18px; }
+  .qs-field{ margin-bottom:14px; }
+  .qs-field label{ font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.04em; color:var(--muted); margin-bottom:6px; display:block; }
+  .qs-input{ display:flex; align-items:center; gap:8px; border:1.5px solid var(--line); border-radius:12px; padding:11px 12px; font-weight:700; font-size:0.86rem; }
+  .qs-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .qs-chip{ padding:7px 11px; border-radius:16px; border:1.5px solid var(--line); font-size:0.72rem; font-weight:700; background:#fff; }
+  .qs-chip.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+  .browse-btn{ margin-top:20px; background:var(--forest); color:#fff; font-weight:700; padding:15px; border-radius:14px; text-align:center; font-size:0.92rem; }
+  .qs-note{ margin-top:16px; font-size:0.74rem; color:var(--muted); line-height:1.5; }
+
+  /* Results (simplified) */
+  .header{ padding:18px 18px 10px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.25rem; margin:0 0 4px; }
+  .header .sub{ font-size:0.78rem; color:var(--muted); }
+  .list{ padding:6px 14px 16px; display:flex; flex-direction:column; gap:12px; }
+  .sitter-card{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:13px; display:flex; gap:11px; align-items:center; }
+  .avatar{ width:58px;height:58px;border-radius:14px; display:flex;align-items:center;justify-content:center; font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;color:#fff; flex-shrink:0; }
+  .info{ flex:1; min-width:0; }
+  .name-line{ display:flex; align-items:center; gap:5px; }
+  .name-line .name{ font-family:'Fraunces',serif; font-weight:600; font-size:0.94rem; }
+  .verified{ width:14px;height:14px;border-radius:50%; background:var(--forest);color:#fff; font-size:0.55rem;display:flex;align-items:center;justify-content:center; }
+  .meta{ font-size:0.7rem; color:var(--muted); margin-top:3px; }
+  .meta .stars{ color:var(--gold); font-weight:700; }
+  .req-btn{ font-size:0.72rem; font-weight:700; color:#fff; background:var(--forest); padding:8px 12px; border-radius:10px; flex-shrink:0; cursor:pointer; }
+
+  .banner{ margin:0 14px 10px; background:#E4EEE9; border-radius:14px; padding:12px 14px; font-size:0.76rem; color:var(--forest); line-height:1.5; }
+
+  /* Bottom sheet checklist */
+  .sheet-backdrop{ position:absolute; inset:0; background:rgba(31,42,36,0.5); display:flex; align-items:flex-end; }
+  .sheet{ background:var(--paper); width:100%; border-radius:26px 26px 0 0; padding:22px 22px 28px; }
+  .sheet-handle{ width:38px; height:4px; background:var(--line); border-radius:3px; margin:0 auto 16px; }
+  .sheet h3{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; margin:0 0 6px; }
+  .sheet p.sub{ font-size:0.82rem; color:var(--muted); margin:0 0 18px; line-height:1.5; }
+  .check-item{ display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid var(--line); }
+  .check-item:last-of-type{ border-bottom:none; }
+  .check-circle{ width:24px;height:24px;border-radius:50%; border:2px solid var(--line); display:flex;align-items:center;justify-content:center; font-size:0.7rem; flex-shrink:0; }
+  .check-circle.done{ background:var(--forest); border-color:var(--forest); color:#fff; }
+  .check-circle.todo{ color:var(--clay); border-color:var(--clay); font-weight:800; }
+  .check-text h4{ margin:0 0 2px; font-size:0.86rem; }
+  .check-text p{ margin:0; font-size:0.72rem; color:var(--muted); }
+  .check-arrow{ margin-left:auto; color:var(--muted); }
+  .sheet-btn{ margin-top:18px; background:var(--forest); color:#fff; font-weight:700; padding:15px; border-radius:14px; text-align:center; font-size:0.9rem; }
+  .sheet-btn.disabled{ background:var(--line); color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Quick start (no signup wall)</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+    <div class="qs-top"><span class="skip">Skip →</span></div>
+    <div class="qs-content">
+      <h1>What are you looking for?</h1>
+      <p>Just enough to show you real sitters — no forms, no signup yet.</p>
+      <div class="qs-form">
+        <div class="qs-field">
+          <label>Location</label>
+          <div class="qs-input">📍 Centurion, Gauteng</div>
+        </div>
+        <div class="qs-field">
+          <label>Dates (optional)</label>
+          <div class="qs-input">📅 Add dates</div>
+        </div>
+        <div class="qs-field" style="margin-bottom:0;">
+          <label>Pet type</label>
+          <div class="qs-chips">
+            <div class="qs-chip on">Dog</div>
+            <div class="qs-chip">Cat</div>
+            <div class="qs-chip">Other</div>
+          </div>
+        </div>
+      </div>
+      <div class="browse-btn">Browse sitters →</div>
+      <div class="qs-note">You can look around freely. We'll only ask for your details — and your pet's — right before you send a booking request.</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — Browsing, no friction</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header">
+        <h2>Sitters near you</h2>
+        <div class="sub">Centurion, Gauteng · Dogs</div>
+      </div>
+      <div class="banner">👀 You're browsing as a guest. Nothing is shared until you request a booking.</div>
+      <div class="list">
+        <div class="sitter-card">
+          <div class="avatar" style="background:var(--clay);">Z</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Zelnice V.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 5.0</span> · 16.3 km · R300/night</div>
+          </div>
+          <div class="req-btn">Request</div>
+        </div>
+        <div class="sitter-card">
+          <div class="avatar" style="background:var(--forest);">A</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Alré S.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 5.0</span> · 32.1 km · R60/visit</div>
+          </div>
+          <div class="req-btn">Request</div>
+        </div>
+        <div class="sitter-card">
+          <div class="avatar" style="background:#8C7A5B;">J</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Justine V.</span><span class="verified" style="background:var(--muted);">…</span></div>
+            <div class="meta">✨ New · 35.9 km · R300/night</div>
+          </div>
+          <div class="req-btn">Request</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">3 — Tapping "Request" triggers this</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>●●●● 4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header">
+        <h2>Sitters near you</h2>
+        <div class="sub">Centurion, Gauteng · Dogs</div>
+      </div>
+      <div class="list">
+        <div class="sitter-card">
+          <div class="avatar" style="background:var(--clay);">Z</div>
+          <div class="info">
+            <div class="name-line"><span class="name">Zelnice V.</span><span class="verified">✓</span></div>
+            <div class="meta"><span class="stars">★ 5.0</span> · 16.3 km · R300/night</div>
+          </div>
+          <div class="req-btn">Request</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-backdrop">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <h3>Almost there</h3>
+        <p class="sub">Before we send your request to Zelnice, she needs to know who's asking — this takes about 2 minutes.</p>
+
+        <div class="check-item">
+          <div class="check-circle done">✓</div>
+          <div class="check-text"><h4>Basic details</h4><p>Name &amp; phone — done at signup</p></div>
+        </div>
+        <div class="check-item">
+          <div class="check-circle todo">!</div>
+          <div class="check-text"><h4>Add your pet</h4><p>Bella's basics — breed, age, feeding</p></div>
+          <div class="check-arrow">›</div>
+        </div>
+        <div class="check-item">
+          <div class="check-circle todo">!</div>
+          <div class="check-text"><h4>Verify your identity</h4><p>Quick ID upload</p></div>
+          <div class="check-arrow">›</div>
+        </div>
+        <div class="check-item">
+          <div class="check-circle todo">!</div>
+          <div class="check-text"><h4>Add payment method</h4><p>Only charged once Zelnice accepts</p></div>
+          <div class="check-arrow">›</div>
+        </div>
+
+        <div class="sheet-btn disabled">Complete 3 steps to send request</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

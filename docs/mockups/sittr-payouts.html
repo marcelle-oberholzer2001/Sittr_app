@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Sitter Payouts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:26px; padding:40px 16px; }
+  .phone{ width:380px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:700px; }
+  .col-label{ width:380px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:0.95rem; color:#6b6558; margin-bottom:-14px; }
+
+  .header{ padding:16px 20px 4px; }
+  .header h1{ font-family:'Fraunces',serif; font-weight:600; font-size:1.35rem; margin:0; }
+  .header .sub{ font-size:0.8rem; color:var(--muted); margin-top:3px; }
+
+  .balance-card{ margin:16px 20px; background:linear-gradient(135deg,#2C4A3E,#1F3830); border-radius:22px; padding:22px; color:#fff; }
+  .balance-card .lbl{ font-size:0.72rem; font-weight:700; opacity:0.75; text-transform:uppercase; letter-spacing:0.04em; }
+  .balance-card .amt{ font-family:'Fraunces',serif; font-weight:600; font-size:2.2rem; margin:4px 0 14px; }
+  .withdraw-btn{ background:#fff; color:var(--forest); font-weight:800; padding:12px; border-radius:12px; text-align:center; font-size:0.85rem; }
+
+  .stat-row{ display:flex; gap:10px; margin:0 20px 16px; }
+  .stat-box{ flex:1; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px; text-align:center; }
+  .stat-box .n{ font-family:'Fraunces',serif; font-weight:600; font-size:1.1rem; }
+  .stat-box .l{ font-size:0.66rem; color:var(--muted); margin-top:2px; }
+
+  .section-label{ margin:16px 20px 8px; font-size:0.72rem; font-weight:800; color:var(--clay); text-transform:uppercase; letter-spacing:0.04em; }
+  .pending-item{ margin:0 20px 8px; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; }
+  .pending-item .txt h4{ margin:0; font-size:0.82rem; }
+  .pending-item .txt p{ margin:2px 0 0; font-size:0.7rem; color:var(--muted); }
+  .pending-item .amt{ font-weight:800; font-size:0.9rem; color:var(--clay); }
+
+  .explain-card{ margin:16px 20px; background:#E4EEE9; border-radius:14px; padding:14px; font-size:0.76rem; color:var(--forest); line-height:1.55; }
+
+  .hist-item{ margin:0 18px 10px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; }
+  .hist-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .hist-top h4{ margin:0; font-size:0.86rem; font-family:'Fraunces',serif; }
+  .hist-top .date{ font-size:0.68rem; color:var(--muted); }
+  .hist-row{ display:flex; justify-content:space-between; font-size:0.78rem; padding:3px 0; }
+  .hist-row span:first-child{ color:var(--muted); }
+  .hist-row.net{ border-top:1px solid var(--line); margin-top:5px; padding-top:7px; font-weight:800; }
+  .sos-tag{ display:inline-block; background:#FBEAE8; color:#C0453A; font-size:0.62rem; font-weight:800; padding:2px 7px; border-radius:6px; margin-left:6px; }
+
+  .field{ margin:0 20px 16px; }
+  .field label{ font-size:0.76rem; font-weight:700; margin-bottom:6px; display:block; }
+  input[type=text]{ width:100%; padding:12px 14px; border:1.5px solid var(--line); border-radius:12px; font-family:'Manrope'; font-size:0.9rem; background:#fff; box-sizing:border-box; }
+  .verify-note{ margin:6px 20px 16px; background:#F1EEE6; border-radius:12px; padding:12px 13px; font-size:0.74rem; color:var(--forest); font-weight:700; line-height:1.5; }
+  .save-btn{ margin:0 20px 20px; background:var(--forest); color:#fff; font-weight:700; padding:14px; border-radius:14px; text-align:center; font-size:0.88rem; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Earnings dashboard</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h1>Your earnings</h1><div class="sub">Payouts go to your linked bank account</div></div>
+
+      <div class="balance-card">
+        <div class="lbl">Available to withdraw</div>
+        <div class="amt">R1,240</div>
+        <div class="withdraw-btn">Withdraw to bank</div>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-box"><div class="n">R570</div><div class="l">Pending</div></div>
+        <div class="stat-box"><div class="n">R8,960</div><div class="l">Lifetime earned</div></div>
+        <div class="stat-box"><div class="n">32</div><div class="l">Paid sits</div></div>
+      </div>
+
+      <div class="section-label">Pending (not yet withdrawable)</div>
+      <div class="pending-item">
+        <div class="txt"><h4>Overnight — Bella</h4><p>Sit ends 15 Jul · releases 2 days after, if no disputes</p></div>
+        <div class="amt">R570</div>
+      </div>
+
+      <div class="explain-card">💡 Owners pay the full amount upfront when a booking is confirmed, but it's held securely — not paid to you. It releases to your account 2 days after the sit ends, giving a short window for either side to flag a problem first. One payment in, one payout out — keeps transaction fees to a minimum on both ends.</div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — Payout history, per booking</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h1>Payout history</h1><div class="sub">Every booking, broken down</div></div>
+
+      <div style="height:6px;"></div>
+
+      <div class="hist-item">
+        <div class="hist-top"><h4>Overnight — Rosie</h4><div class="date">20–22 Jun</div></div>
+        <div class="hist-row"><span>Sitting fee (2 nights)</span><span>R600</span></div>
+        <div class="hist-row"><span>Platform commission (5%)</span><span>−R30</span></div>
+        <div class="hist-row net"><span>Net payout</span><span>R570</span></div>
+      </div>
+
+      <div class="hist-item">
+        <div class="hist-top"><h4>SOS backup — Buddy <span class="sos-tag">SOS</span></h4><div class="date">6–7 Jul</div></div>
+        <div class="hist-row"><span>Remaining 2 nights (original sitter's rate, R150/night)</span><span>R300</span></div>
+        <div class="hist-row"><span>Platform commission (5%)</span><span>−R15</span></div>
+        <div class="hist-row net"><span>Net payout</span><span>R285</span></div>
+      </div>
+
+      <div class="hist-item">
+        <div class="hist-top"><h4>2x daily visits — Max</h4><div class="date">8–10 Jul</div></div>
+        <div class="hist-row"><span>3 days @ R140</span><span>R420</span></div>
+        <div class="hist-row"><span>Platform commission (5%)</span><span>−R21</span></div>
+        <div class="hist-row net"><span>Net payout</span><span>R399</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">3 — Add bank details (missing from onboarding)</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="header"><h1>Add your bank account</h1><div class="sub">Where your payouts will be sent</div></div>
+
+      <div class="field"><label>Account holder name</label><input type="text" placeholder="As it appears on your account"></div>
+      <div class="field"><label>Bank</label><input type="text" placeholder="e.g. FNB, Capitec, Standard Bank"></div>
+      <div class="field"><label>Account number</label><input type="text" placeholder="•••• •••• ••••"></div>
+      <div class="field"><label>Branch code</label><input type="text" placeholder="e.g. 250655"></div>
+
+      <div class="verify-note">🔒 We verify this account matches your ID before your first payout — protects you from payouts ever going to the wrong account.</div>
+      <div class="save-btn">Save bank details</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

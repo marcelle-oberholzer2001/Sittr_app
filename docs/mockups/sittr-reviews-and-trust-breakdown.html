@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Reviews &amp; Trust Score Breakdown</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --gold:#D9A441; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; flex-wrap:wrap; justify-content:center; gap:26px; padding:40px 16px; }
+  .phone{ width:365px; max-width:100%; background:var(--paper); border-radius:36px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 20px 4px; font-size:12px; font-weight:700; }
+  .scroll{ overflow-y:auto; flex:1; max-height:660px; }
+  .col-label{ width:365px; max-width:100%; text-align:center; font-family:'Fraunces',serif; font-size:0.95rem; color:#6b6558; margin-bottom:-14px; }
+
+  .header{ padding:16px 18px 4px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; margin:0; }
+  .header .sub{ font-size:0.76rem; color:var(--muted); margin-top:3px; }
+
+  .booking-mini{ margin:14px 18px; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px; display:flex; align-items:center; gap:11px; }
+  .booking-mini .av{ width:42px;height:42px;border-radius:11px; background:var(--clay); flex-shrink:0; }
+  .booking-mini .nm{ font-family:'Fraunces',serif; font-weight:600; font-size:0.88rem; }
+  .booking-mini .sub2{ font-size:0.7rem; color:var(--muted); }
+
+  .stars-row{ display:flex; justify-content:center; gap:8px; margin:18px 0; }
+  .star{ font-size:2rem; color:var(--line); }
+  .star.filled{ color:var(--gold); }
+
+  .tag-section{ margin:0 18px 16px; }
+  .tag-section label{ font-size:0.72rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.03em; margin-bottom:8px; display:block; }
+  .tag-grid{ display:flex; flex-wrap:wrap; gap:7px; }
+  .rtag{ padding:8px 12px; border-radius:18px; border:1.5px solid var(--line); font-size:0.76rem; font-weight:700; background:#fff; }
+  .rtag.on{ background:var(--forest); border-color:var(--forest); color:#fff; }
+
+  .comment-box{ margin:0 18px 16px; }
+  textarea{ width:100%; border:1.5px solid var(--line); border-radius:12px; padding:12px 13px; font-family:'Manrope'; font-size:0.85rem; resize:none; box-sizing:border-box; }
+
+  .submit-btn{ margin:0 18px 20px; background:var(--forest); color:#fff; font-weight:700; padding:14px; border-radius:14px; text-align:center; font-size:0.88rem; }
+
+  .private-note{ margin:0 18px 16px; font-size:0.72rem; color:var(--muted); background:#F1EEE6; padding:10px 13px; border-radius:12px; line-height:1.5; }
+
+  .score-hero{ text-align:center; padding:24px 20px 10px; }
+  .score-ring{ position:relative; width:120px; height:120px; margin:0 auto 10px; }
+  .score-ring svg{ position:absolute; top:0; left:0; }
+  .score-num{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+  .score-num .n{ font-family:'Fraunces',serif; font-weight:600; font-size:1.9rem; color:var(--forest); }
+  .score-num .lbl{ font-size:0.62rem; color:var(--muted); font-weight:700; text-transform:uppercase; }
+  .score-hero p{ font-size:0.8rem; color:var(--muted); margin:0; }
+
+  .comp-list{ padding:6px 18px 20px; }
+  .comp-item{ background:var(--card); border:1px solid var(--line); border-radius:14px; padding:13px 14px; margin-bottom:10px; }
+  .comp-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .comp-top h4{ margin:0; font-size:0.84rem; }
+  .comp-top .wt{ font-size:0.66rem; color:var(--muted); font-weight:700; }
+  .comp-bar{ height:8px; background:#F1EEE6; border-radius:5px; overflow:hidden; }
+  .comp-bar .fill{ height:100%; background:var(--forest); border-radius:5px; }
+  .comp-note{ font-size:0.7rem; color:var(--muted); margin-top:6px; }
+</style>
+</head>
+<body>
+
+<div>
+  <div class="col-label">1 — Owner rates the sitter</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>10:02</span><span>4G 🔋</span></div>
+    <div class="header"><h2>How was Zelnice?</h2><div class="sub">Overnight sleepover · 13–15 Jul</div></div>
+    <div class="booking-mini">
+      <div class="av"></div>
+      <div><div class="nm">Zelnice V.</div><div class="sub2">Sat for Bella · 2 nights</div></div>
+    </div>
+    <div class="stars-row">
+      <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+    </div>
+    <div class="tag-section">
+      <label>What stood out?</label>
+      <div class="tag-grid">
+        <div class="rtag on">Great communication</div>
+        <div class="rtag on">On time</div>
+        <div class="rtag">Extra caring</div>
+        <div class="rtag">Great photos/updates</div>
+      </div>
+    </div>
+    <div class="comment-box">
+      <textarea rows="3" placeholder="Anything else to add?">Zelnice sent updates every day and Bella clearly loved her. Would book again in a heartbeat.</textarea>
+    </div>
+    <div class="submit-btn">Submit review</div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">2 — Sitter rates the owner</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>10:02</span><span>4G 🔋</span></div>
+    <div class="header"><h2>How was Suzie?</h2><div class="sub">Overnight sleepover · 13–15 Jul</div></div>
+    <div class="booking-mini">
+      <div class="av" style="background:var(--forest);"></div>
+      <div><div class="nm">Suzie M.</div><div class="sub2">Owner of Bella</div></div>
+    </div>
+    <div class="stars-row">
+      <span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span><span class="star filled">★</span>
+    </div>
+    <div class="tag-section">
+      <label>What stood out?</label>
+      <div class="tag-grid">
+        <div class="rtag on">Accurate pet info</div>
+        <div class="rtag on">Clear home instructions</div>
+        <div class="rtag">Easy to reach</div>
+        <div class="rtag">Home left tidy</div>
+      </div>
+    </div>
+    <div class="comment-box">
+      <textarea rows="3" placeholder="Anything else to add?">Bella's profile had everything I needed, made the sit really easy.</textarea>
+    </div>
+    <div class="submit-btn">Submit review</div>
+    <div class="private-note">🔒 This review only affects Suzie's private reliability record — it isn't shown publicly, so owners can be reviewed honestly without it becoming a public callout.</div>
+  </div>
+</div>
+
+<div>
+  <div class="col-label">3 — Sitter's own trust score breakdown</div><br>
+  <div class="phone">
+    <div class="statusbar"><span>20:24</span><span>4G 🔋</span></div>
+    <div class="scroll">
+      <div class="score-hero">
+        <div class="score-ring">
+          <svg width="120" height="120">
+            <circle cx="60" cy="60" r="50" stroke="#E7E2D8" stroke-width="10" fill="none"/>
+            <circle cx="60" cy="60" r="50" stroke="#2C4A3E" stroke-width="10" fill="none"
+              stroke-dasharray="314" stroke-dashoffset="60" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+          </svg>
+          <div class="score-num"><div class="n">83</div><div class="lbl">Trust Score</div></div>
+        </div>
+        <p>Recalculated nightly from your last 12 months of activity</p>
+      </div>
+
+      <div class="comp-list">
+        <div class="comp-item">
+          <div class="comp-top"><h4>⭐ Review quality</h4><span class="wt">30% weight</span></div>
+          <div class="comp-bar"><div class="fill" style="width:95%;"></div></div>
+          <div class="comp-note">4.9★ average across 12 reviews — excellent</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-top"><h4>⏱ Reliability</h4><span class="wt">25% weight</span></div>
+          <div class="comp-bar"><div class="fill" style="width:98%;"></div></div>
+          <div class="comp-note">95% acceptance, 0 cancellations, fast responses</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-top"><h4>✔ Verification</h4><span class="wt">20% weight</span></div>
+          <div class="comp-bar"><div class="fill" style="width:80%;"></div></div>
+          <div class="comp-note">Baseline verified + First Aid + video. Add Pet Sitter Institute SA certification to boost this further.</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-top"><h4>📈 Experience</h4><span class="wt">15% weight</span></div>
+          <div class="comp-bar"><div class="fill" style="width:46%;"></div></div>
+          <div class="comp-note">18 completed bookings — this grows fastest early on, keep going</div>
+        </div>
+        <div class="comp-item">
+          <div class="comp-top"><h4>🔁 Repeat clients</h4><span class="wt">10% weight</span></div>
+          <div class="comp-bar"><div class="fill" style="width:42.9%;"></div></div>
+          <div class="comp-note">6 of 14 owners rebooked you (43%) — a strong signal this early on</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

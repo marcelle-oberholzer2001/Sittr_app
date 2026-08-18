@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Splash &amp; Role Select</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E; --forest-deep:#1F3830;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink);
+    display:flex; justify-content:center; align-items:center; min-height:100vh; padding:40px 16px;
+  }
+  .phone{
+    width:390px; max-width:100%; height:780px;
+    background:var(--forest-deep);
+    border-radius:38px; overflow:hidden; position:relative;
+    box-shadow:0 30px 60px rgba(0,0,0,0.2); border:8px solid #111;
+  }
+  .screen{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    transition:opacity 0.6s ease;
+  }
+
+  /* ---- Splash ---- */
+  #splash{
+    background:var(--forest-deep);
+    align-items:center; justify-content:center;
+    z-index:2;
+  }
+  .paw{ width:130px; height:130px; }
+  .toe, .pad{ fill:#4C6B5B; transition:fill 0.35s ease; }
+  .toe.lit, .pad.lit{ fill:#C77A4E; }
+  .brand{
+    margin-top:26px; font-family:'Fraunces',serif; font-weight:600; font-size:1.6rem; color:#F7F5F1;
+    letter-spacing:0.02em;
+  }
+  .brand-sub{
+    margin-top:4px; font-size:0.72rem; color:#9FB0A5; letter-spacing:0.14em; text-transform:uppercase;
+  }
+
+  /* ---- Role select ---- */
+  #roles{
+    background:var(--paper); opacity:0; pointer-events:none;
+    padding:56px 24px 40px; align-items:stretch; justify-content:flex-start;
+  }
+  #roles.active{ opacity:1; pointer-events:auto; }
+  #splash.hidden{ opacity:0; pointer-events:none; }
+
+  .roles-header{ text-align:center; margin-bottom:34px; }
+  .roles-header h1{
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.6rem; margin:0 0 8px;
+  }
+  .roles-header p{ font-size:0.88rem; color:var(--muted); margin:0; line-height:1.5; }
+
+  .role-card{
+    background:var(--card); border:1.5px solid var(--line); border-radius:20px;
+    padding:22px; display:flex; align-items:center; gap:16px; margin-bottom:16px;
+    cursor:pointer; transition:border-color 0.2s, transform 0.2s;
+  }
+  .role-card:active{ transform:scale(0.98); }
+  .role-card.owner:hover, .role-card.owner.selected{ border-color:var(--clay); }
+  .role-card.sitter:hover, .role-card.sitter.selected{ border-color:var(--forest); }
+  .role-icon{
+    width:52px; height:52px; border-radius:14px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .role-card.owner .role-icon{ background:#F3E3D6; }
+  .role-card.sitter .role-icon{ background:#E3EAE6; }
+  .role-text h3{ font-family:'Fraunces',serif; font-size:1.05rem; margin:0 0 3px; }
+  .role-text p{ font-size:0.78rem; color:var(--muted); margin:0; line-height:1.4; }
+
+  .both-note{
+    margin-top:6px; text-align:center; font-size:0.78rem; color:var(--muted);
+    background:#EFEAE0; border-radius:14px; padding:12px 16px; line-height:1.5;
+  }
+  .both-note b{ color:var(--ink); }
+
+  .continue-btn{
+    margin-top:auto; background:var(--forest); color:#fff; border:none;
+    padding:16px; border-radius:16px; font-family:'Manrope',sans-serif; font-weight:700;
+    font-size:0.95rem; text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- SPLASH -->
+  <div class="screen" id="splash">
+    <svg class="paw" viewBox="0 0 120 120">
+      <ellipse class="pad" id="pad" cx="60" cy="78" rx="30" ry="24"/>
+      <circle class="toe" id="toe1" cx="24" cy="52" r="13"/>
+      <circle class="toe" id="toe2" cx="46" cy="30" r="14"/>
+      <circle class="toe" id="toe3" cx="74" cy="30" r="14"/>
+      <circle class="toe" id="toe4" cx="96" cy="52" r="13"/>
+    </svg>
+    <div class="brand">Sittr</div>
+    <div class="brand-sub">Trusted Pet Care</div>
+  </div>
+
+  <!-- ROLE SELECT -->
+  <div class="screen" id="roles">
+    <div class="roles-header">
+      <h1>Welcome to Sittr</h1>
+      <p>Tell us why you're here today —<br>you can always add the other role later.</p>
+    </div>
+
+    <div class="role-card owner" onclick="selectRole('owner', this)">
+      <div class="role-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28"><path d="M14 4 L24 10 V24 H4 V10 Z" fill="none" stroke="#C77A4E" stroke-width="2.2" stroke-linejoin="round"/><circle cx="14" cy="17" r="3" fill="#C77A4E"/></svg>
+      </div>
+      <div class="role-text">
+        <h3>I need a sitter</h3>
+        <p>Find a trusted, verified sitter for your pet</p>
+      </div>
+    </div>
+
+    <div class="role-card sitter" onclick="selectRole('sitter', this)">
+      <div class="role-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28"><circle cx="14" cy="14" r="10" fill="none" stroke="#2C4A3E" stroke-width="2.2"/><path d="M9 14 L12.5 17.5 L19 10.5" fill="none" stroke="#2C4A3E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="role-text">
+        <h3>I want to sit</h3>
+        <p>Get verified and start earning as a sitter</p>
+      </div>
+    </div>
+
+    <div class="both-note">🐾 <b>Most people do both.</b> You can switch roles anytime from your profile — no need to create a second account.</div>
+
+    <div class="continue-btn" onclick="alert('Continues to onboarding →')">Continue</div>
+  </div>
+
+</div>
+
+<script>
+  const toes = ['pad','toe1','toe2','toe3','toe4'];
+  let i = 0;
+  function pulse(){
+    toes.forEach(id => document.getElementById(id).classList.remove('lit'));
+    document.getElementById(toes[i]).classList.add('lit');
+    i = (i + 1) % toes.length;
+  }
+  const loop = setInterval(pulse, 260);
+
+  setTimeout(() => {
+    clearInterval(loop);
+    document.getElementById('splash').classList.add('hidden');
+    document.getElementById('roles').classList.add('active');
+  }, 2600);
+
+  let chosen = null;
+  function selectRole(role, el){
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    chosen = role;
+  }
+</script>
+</body>
+</html>

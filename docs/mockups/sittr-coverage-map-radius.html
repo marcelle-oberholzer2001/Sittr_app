@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sittr — Coverage Area, Map + Radius</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+  :root{
+    --paper:#F7F5F1; --ink:#1F2A24; --forest:#2C4A3E;
+    --clay:#C77A4E; --card:#FFFFFF; --line:#E7E2D8; --muted:#847C6C;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; background:#E9E5DC; font-family:'Manrope',sans-serif; color:var(--ink); display:flex; justify-content:center; padding:40px 16px; }
+  .phone{ width:390px; max-width:100%; background:var(--paper); border-radius:38px; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.18); border:8px solid #111; display:flex; flex-direction:column; }
+  .statusbar{ display:flex; justify-content:space-between; padding:14px 22px 4px; font-size:13px; font-weight:700; }
+
+  .header{ padding:14px 20px 4px; }
+  .header h2{ font-family:'Fraunces',serif; font-weight:600; font-size:1.2rem; margin:0; }
+  .header .sub{ font-size:0.78rem; color:var(--muted); margin-top:3px; }
+
+  .search-bar{ margin:12px 20px; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:11px 14px; font-size:0.82rem; color:var(--muted); display:flex; align-items:center; gap:8px; }
+
+  .map-wrap{ margin:0 20px; border-radius:18px; overflow:hidden; position:relative; height:320px; background:#EDEAE1; border:1px solid var(--line); }
+  .map-grid{
+    position:absolute; inset:0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 38px, #DDD8CC 38px, #DDD8CC 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 55px, #DDD8CC 55px, #DDD8CC 57px);
+  }
+  .map-blob{ position:absolute; background:#E0E8E2; border-radius:40% 60% 55% 45%; opacity:0.7; }
+
+  .radius-circle{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    border-radius:50%; background:rgba(44,74,62,0.16); border:2px solid var(--forest);
+    transition:width 0.25s ease, height 0.25s ease;
+  }
+  .center-pin{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-100%);
+    font-size:30px; z-index:5; filter:drop-shadow(0 3px 3px rgba(0,0,0,0.25));
+  }
+  .center-dot{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:9px;height:9px;border-radius:50%; background:var(--forest); border:2px solid #fff; z-index:6; }
+
+  .radius-readout{ text-align:center; margin:16px 20px 6px; }
+  .radius-readout .n{ font-family:'Fraunces',serif; font-weight:600; font-size:1.6rem; color:var(--forest); }
+  .radius-readout .l{ font-size:0.74rem; color:var(--muted); }
+
+  .slider-row{ margin:6px 20px 4px; }
+  input[type=range]{ width:100%; accent-color:#2C4A3E; }
+  .slider-labels{ display:flex; justify-content:space-between; font-size:0.68rem; color:var(--muted); margin-top:2px; }
+
+  .hint{ margin:14px 20px 20px; font-size:0.76rem; color:var(--forest); background:#E4EEE9; border-radius:12px; padding:12px 14px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>09:14</span><span>4G 🔋</span></div>
+
+  <div class="header">
+    <h2>Where can you sit?</h2>
+    <div class="sub">Drag the slider to set how far you're willing to travel</div>
+  </div>
+
+  <div class="search-bar">🔍 <span>Moreleta Park, Centurion</span></div>
+
+  <div class="map-wrap">
+    <div class="map-grid"></div>
+    <div class="map-blob" style="width:120px;height:90px; top:20px; left:-20px;"></div>
+    <div class="map-blob" style="width:100px;height:70px; bottom:10px; right:-10px;"></div>
+    <div class="radius-circle" id="circle" style="width:180px;height:180px;"></div>
+    <div class="center-pin">📍</div>
+    <div class="center-dot"></div>
+  </div>
+
+  <div class="radius-readout">
+    <div class="n" id="radiusLabel">8 km</div>
+    <div class="l">coverage radius from your area</div>
+  </div>
+
+  <div class="slider-row">
+    <input type="range" min="2" max="20" value="8" id="radiusSlider" oninput="updateRadius(this.value)">
+    <div class="slider-labels"><span>2 km</span><span>20 km</span></div>
+  </div>
+
+  <div class="hint">💡 Owners searching within this circle will see your profile. No travel fees either way — pick a distance you'd genuinely drive for free.</div>
+</div>
+
+<script>
+  function updateRadius(km){
+    document.getElementById('radiusLabel').textContent = km + ' km';
+    const px = 40 + (km * 14);
+    const circle = document.getElementById('circle');
+    circle.style.width = px + 'px';
+    circle.style.height = px + 'px';
+  }
+  updateRadius(8);
+</script>
+</body>
+</html>

@@ -22,8 +22,6 @@ interface PetForm {
   sleepingLocation: string;
   behaviourNotes: string;
   vetName: string;
-  vetPhone: string;
-  vetAddress: string;
   saved: boolean;
 }
 
@@ -37,8 +35,6 @@ interface CopySource {
   sleepingLocation: string;
   behaviourNotes: string;
   vetName: string;
-  vetPhone: string;
-  vetAddress: string;
 }
 
 function PetDetailsForm() {
@@ -87,8 +83,6 @@ function PetDetailsForm() {
           sleepingLocation: p.sleeping_location ?? "",
           behaviourNotes: p.behaviour_notes ?? "",
           vetName: p.vet_name ?? "",
-          vetPhone: p.vet_phone ?? "",
-          vetAddress: p.vet_address ?? "",
           saved: false,
         })),
       );
@@ -98,7 +92,7 @@ function PetDetailsForm() {
       const { data: siblingData } = await supabase
         .from("pets")
         .select(
-          "id, name, feeding, medication, allergies, walking_routine, sleeping_location, behaviour_notes, vet_name, vet_phone, vet_address",
+          "id, name, feeding, medication, allergies, walking_routine, sleeping_location, behaviour_notes, vet_name",
         )
         .eq("owner_id", ownerId);
 
@@ -116,8 +110,6 @@ function PetDetailsForm() {
               sleepingLocation: p.sleeping_location ?? "",
               behaviourNotes: p.behaviour_notes ?? "",
               vetName: p.vet_name ?? "",
-              vetPhone: p.vet_phone ?? "",
-              vetAddress: p.vet_address ?? "",
             })),
         );
       }
@@ -140,8 +132,6 @@ function PetDetailsForm() {
       sleepingLocation: source.sleepingLocation,
       behaviourNotes: source.behaviourNotes,
       vetName: source.vetName,
-      vetPhone: source.vetPhone,
-      vetAddress: source.vetAddress,
     });
   }
 
@@ -171,8 +161,6 @@ function PetDetailsForm() {
         sleeping_location: active.sleepingLocation || null,
         behaviour_notes: active.behaviourNotes || null,
         vet_name: active.vetName || null,
-        vet_phone: active.vetPhone || null,
-        vet_address: active.vetAddress || null,
       })
       .eq("id", active.id);
 
@@ -350,7 +338,7 @@ function PetDetailsForm() {
         </div>
 
         <div className="mb-2 text-[0.68rem] font-extrabold tracking-wide text-terracotta uppercase">Vet</div>
-        <div className="mb-4">
+        <div>
           <label className="mb-1.5 block text-xs font-bold text-ink">Vet name</label>
           <input
             type="text"
@@ -359,26 +347,9 @@ function PetDetailsForm() {
             placeholder="Clinic name"
             className={inputClass}
           />
-        </div>
-        <div className="mb-4">
-          <label className="mb-1.5 block text-xs font-bold text-ink">Vet phone</label>
-          <input
-            type="text"
-            value={active.vetPhone}
-            onChange={(e) => updateActive({ vetPhone: e.target.value })}
-            placeholder="012 345 6789"
-            className={inputClass}
-          />
-        </div>
-        <div>
-          <label className="mb-1.5 block text-xs font-bold text-ink">Vet address</label>
-          <input
-            type="text"
-            value={active.vetAddress}
-            onChange={(e) => updateActive({ vetAddress: e.target.value })}
-            placeholder="For emergencies"
-            className={inputClass}
-          />
+          <p className="mt-1.5 text-xs leading-relaxed text-muted">
+            Just the name — sitters can look up the address if they need it.
+          </p>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { fetchPetsByBooking, petNames, type BookingPet } from "@/lib/booking-pets";
 import { comfortableLabelFor } from "@/lib/species";
@@ -36,11 +36,12 @@ function formatDateRange(from: string, to: string) {
   return `${fromStr} – ${toStr}`;
 }
 
-export default function SitterRequestsPage() {
+function SitterRequestsPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<BookingRow[]>([]);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(searchParams.get("bookingId"));
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agreeChecked, setAgreeChecked] = useState(false);
@@ -778,5 +779,13 @@ export default function SitterRequestsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SitterRequestsPage() {
+  return (
+    <Suspense>
+      <SitterRequestsPageInner />
+    </Suspense>
   );
 }

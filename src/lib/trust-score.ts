@@ -64,7 +64,9 @@ function reviewScore(reviews: ReviewRow[], platformAvg: number, now: Date): numb
 }
 
 function reliabilityScore(bookings: BookingRow[]): number {
-  if (bookings.length === 0) return 100;
+  // No bookings means no evidence either way -- assume average (matching
+  // reviewScore's zero-data treatment), not a perfect, unearned 100.
+  if (bookings.length === 0) return 60;
 
   const resolved = bookings.filter((b) => b.status !== "pending");
   const acceptanceRate = (resolved.length / bookings.length) * 100;

@@ -23,13 +23,10 @@ interface ClipboardData {
   sleepingLocation: string;
   behaviourNotes: string;
   vetName: string;
-  vetPhone: string;
-  vetAddress: string;
   accessCode: string;
   wifiPassword: string;
   dustbinDay: string;
   householdNotes: string;
-  meetGreetNotes: string;
 }
 
 function formatDateRange(from: string, to: string) {
@@ -67,6 +64,18 @@ function ConfirmRow({ checked, onToggle }: { checked: boolean; onToggle: () => v
   );
 }
 
+function SectionNotes({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <textarea
+      rows={2}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="Add a note for this section"
+      className="mt-2 w-full resize-none rounded-xl border-[1.5px] border-line bg-white px-3 py-2 text-xs text-ink outline-none"
+    />
+  );
+}
+
 export default function ClipboardClient({ petId }: { petId: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -74,7 +83,9 @@ export default function ClipboardClient({ petId }: { petId: string }) {
   const [feedingConfirmed, setFeedingConfirmed] = useState(false);
   const [medicationConfirmed, setMedicationConfirmed] = useState(false);
   const [walkingConfirmed, setWalkingConfirmed] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [feedingNotes, setFeedingNotes] = useState("");
+  const [medicationNotes, setMedicationNotes] = useState("");
+  const [walkingNotes, setWalkingNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -136,15 +147,17 @@ export default function ClipboardClient({ petId }: { petId: string }) {
         sleepingLocation: pet.sleeping_location || "Not provided",
         behaviourNotes: pet.behaviour_notes || "Not provided",
         vetName: pet.vet_name || "Not provided",
-        vetPhone: pet.vet_phone || "Not provided",
-        vetAddress: pet.vet_address || "Not provided",
         accessCode: homeRes.data?.access_code || "Not provided",
         wifiPassword: homeRes.data?.wifi_password || "Not provided",
         dustbinDay: homeRes.data?.dustbin_day || "Not provided",
         householdNotes: homeRes.data?.household_notes || "Not provided",
-        meetGreetNotes: pet.meet_greet_notes || "",
       });
-      setNotes(pet.meet_greet_notes || "");
+      setFeedingNotes(pet.feeding_notes || "");
+      setMedicationNotes(pet.medication_notes || "");
+      setWalkingNotes(pet.walking_notes || "");
+      setFeedingConfirmed(pet.feeding_confirmed ?? false);
+      setMedicationConfirmed(pet.medication_confirmed ?? false);
+      setWalkingConfirmed(pet.walking_confirmed ?? false);
       setLoading(false);
     })();
   }, [petId]);
@@ -156,7 +169,14 @@ export default function ClipboardClient({ petId }: { petId: string }) {
 
     const { error: updateError } = await supabase
       .from("pets")
-      .update({ meet_greet_notes: notes })
+      .update({
+        feeding_notes: feedingNotes,
+        medication_notes: medicationNotes,
+        walking_notes: walkingNotes,
+        feeding_confirmed: feedingConfirmed,
+        medication_confirmed: medicationConfirmed,
+        walking_confirmed: walkingConfirmed,
+      })
       .eq("id", petId);
 
     setSaving(false);
@@ -234,7 +254,20 @@ export default function ClipboardClient({ petId }: { petId: string }) {
         <div className="mb-4 rounded-2xl border border-line bg-white p-3.5">
           <FactRow label="Feeding" value={data.feeding} />
           <FactRow label="Allergies" value={data.allergies} />
-          <ConfirmRow checked={feedingConfirmed} onToggle={() => setFeedingConfirmed((v) => !v)} />
+          <ConfirmRow
+            checked={feedingConfirmed}
+            onToggle={() => {
+              setFeedingConfirmed((v) => !v);
+              setSaved(false);
+            }}
+          />
+          <SectionNotes
+            value={feedingNotes}
+            onChange={(v) => {
+              setFeedingNotes(v);
+              setSaved(false);
+            }}
+          />
         </div>
 
         <h3 className="mb-2 flex items-center gap-1.5 font-serif text-sm font-semibold text-ink">
@@ -242,7 +275,20 @@ export default function ClipboardClient({ petId }: { petId: string }) {
         </h3>
         <div className="mb-4 rounded-2xl border border-line bg-white p-3.5">
           <FactRow label="Current medication" value={data.medication} />
-          <ConfirmRow checked={medicationConfirmed} onToggle={() => setMedicationConfirmed((v) => !v)} />
+          <ConfirmRow
+            checked={medicationConfirmed}
+            onToggle={() => {
+              setMedicationConfirmed((v) => !v);
+              setSaved(false);
+            }}
+          />
+          <SectionNotes
+            value={medicationNotes}
+            onChange={(v) => {
+              setMedicationNotes(v);
+              setSaved(false);
+            }}
+          />
         </div>
 
         <h3 className="mb-2 flex items-center gap-1.5 font-serif text-sm font-semibold text-ink">
@@ -252,7 +298,20 @@ export default function ClipboardClient({ petId }: { petId: string }) {
           <FactRow label="Walks" value={data.walkingRoutine} />
           <FactRow label="Sleeping" value={data.sleepingLocation} />
           <FactRow label="Behaviour notes" value={data.behaviourNotes} />
-          <ConfirmRow checked={walkingConfirmed} onToggle={() => setWalkingConfirmed((v) => !v)} />
+          <ConfirmRow
+            checked={walkingConfirmed}
+            onToggle={() => {
+              setWalkingConfirmed((v) => !v);
+              setSaved(false);
+            }}
+          />
+          <SectionNotes
+            value={walkingNotes}
+            onChange={(v) => {
+              setWalkingNotes(v);
+              setSaved(false);
+            }}
+          />
         </div>
 
         <h3 className="mb-2 flex items-center gap-1.5 font-serif text-sm font-semibold text-ink">
@@ -262,14 +321,6 @@ export default function ClipboardClient({ petId }: { petId: string }) {
           <div className="flex justify-between gap-2.5 border-b border-[#E8B892] py-1.5 text-sm">
             <span className="shrink-0 text-muted">Vet clinic</span>
             <span className="text-right font-bold text-[#B85C2E]">{data.vetName}</span>
-          </div>
-          <div className="flex justify-between gap-2.5 border-b border-[#E8B892] py-1.5 text-sm">
-            <span className="shrink-0 text-muted">Phone</span>
-            <span className="text-right font-bold text-[#B85C2E]">{data.vetPhone}</span>
-          </div>
-          <div className="flex justify-between gap-2.5 border-b border-[#E8B892] py-1.5 text-sm">
-            <span className="shrink-0 text-muted">Address</span>
-            <span className="text-right font-bold text-[#B85C2E]">{data.vetAddress}</span>
           </div>
           <div className="flex justify-between gap-2.5 py-1.5 text-sm">
             <span className="shrink-0 text-muted">Owner emergency contact</span>
@@ -292,21 +343,6 @@ export default function ClipboardClient({ petId }: { petId: string }) {
           <FactRow label="Other notes" value={data.householdNotes} />
         </div>
 
-        <h3 className="mb-2 flex items-center gap-1.5 font-serif text-sm font-semibold text-ink">
-          ✏️ Notes from the meet &amp; greet
-        </h3>
-        <div className="mb-2 rounded-2xl border border-line bg-white p-3.5">
-          <textarea
-            rows={3}
-            value={notes}
-            onChange={(e) => {
-              setNotes(e.target.value);
-              setSaved(false);
-            }}
-            placeholder="Anything mentioned that isn't already saved above"
-            className="w-full resize-none rounded-xl border-[1.5px] border-line bg-white px-3 py-2.5 text-sm text-ink outline-none"
-          />
-        </div>
         {error && (
           <p className="mb-4 rounded-xl bg-[#FDECE3] px-3.5 py-3 text-xs leading-relaxed text-terracotta">
             {error}

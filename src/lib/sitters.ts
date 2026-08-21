@@ -1,4 +1,5 @@
 import type { RatesMap } from "./pet-services";
+import type { SitterReference } from "./languages";
 
 export interface Review {
   name: string;
@@ -25,6 +26,8 @@ export interface Sitter {
   services: string[];
   comfortableWith: string[];
   reviews: Review[];
+  languages?: string[];
+  references?: SitterReference[];
 }
 
 const AVATAR_COLORS = ["#C77A4E", "#2C4A3E", "#8C7A5B", "#4C6B5B", "#B0562F"];

@@ -94,7 +94,12 @@ export function RequestSheet({
 
   function goToPetDetails() {
     if (incompletePets.length === 0) return;
-    const returnTo = typeof window !== "undefined" ? window.location.pathname + window.location.search : "/home";
+    let returnTo = "/home";
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("requesting", "1");
+      returnTo = url.pathname + url.search;
+    }
     const ids = incompletePets.map((p) => p.id).join(",");
     router.push(`/parent/pet-passport/details?petIds=${ids}&redirect=${encodeURIComponent(returnTo)}`);
   }

@@ -7,11 +7,12 @@ import { SUBURB_SUGGESTIONS } from "@/lib/suburbs";
 import { supabase } from "@/lib/supabase/client";
 import { uploadPhoto } from "@/lib/upload-photo";
 import { uploadVideo } from "@/lib/upload-video";
-import { submitIdDocument } from "@/lib/upload-id-document";
+import { isValidSaIdNumber, submitIdNumber } from "@/lib/submit-id-number";
 import { computeTrustScores, type TrustScoreBreakdown } from "@/lib/trust-score";
 import { fetchSitterPhotos, type SitterPhoto } from "@/lib/sitter-photos";
+import { LANGUAGES, emptyReference, type SitterReference } from "@/lib/languages";
 
-type VerificationStatus = "not_started" | "pending" | "verified" | "rejected";
+type VerificationStatus = "not_started" | "verified";
 
 const DOG_SIZE_OPTIONS = DOG_SIZES.map((size) => `${size} dogs`);
 const COMFORTABLE_OPTIONS = [
@@ -47,13 +48,15 @@ export default function SitterProfilePage() {
   const [removingPosition, setRemovingPosition] = useState<number | null>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [idStatus, setIdStatus] = useState<VerificationStatus>("not_started");
-  const [idNote, setIdNote] = useState<string | null>(null);
   const [submittingId, setSubmittingId] = useState(false);
-  const idFileInputRef = useRef<HTMLInputElement>(null);
+  const [idNumber, setIdNumber] = useState("");
+  const [idError, setIdError] = useState<string | null>(null);
   const [coverageAreas, setCoverageAreas] = useState<string[]>([]);
   const [suburbQuery, setSuburbQuery] = useState("");
   const [services, setServices] = useState<string[]>([]);
   const [comfortableWith, setComfortableWith] = useState<string[]>([]);
+  const [languages, setLanguages] = useState<string[]>([]);
+  const [references, setReferences] = useState<SitterReference[]>([]);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [becomingOwner, setBecomingOwner] = useState(false);
@@ -73,7 +76,7 @@ export default function SitterProfilePage() {
       const { data, error: fetchError } = await supabase
         .from("profiles")
         .select(
-          "full_name, bio, coverage_areas, services, comfortable_with, id_verification_status, id_verification_note, avatar_url, intro_video_url, is_owner",
+          "full_name, bio, coverage_areas, services, comfortable_with, id_verification_status, avatar_url, intro_video_url, is_owner, languages_spoken, sitter_references",
         )
         .eq("id", uid)
         .single();
@@ -85,10 +88,15 @@ export default function SitterProfilePage() {
         setServices(data.services ?? []);
         setComfortableWith(data.comfortable_with ?? []);
         setIdStatus(data.id_verification_status as VerificationStatus);
-        setIdNote(data.id_verification_note);
         setAvatarUrl(data.avatar_url ?? null);
         setIntroVideoUrl(data.intro_video_url ?? null);
         setIsOwner(data.is_owner ?? false);
+        setLanguages(data.languages_spoken ?? []);
+        setReferences(
+          data.sitter_references && data.sitter_references.length > 0
+            ? data.sitter_references
+            : [emptyReference()],
+        );
       }
 
       setPhotos(await fetchSitterPhotos(uid));
@@ -207,21 +215,17 @@ export default function SitterProfilePage() {
     setAvatarUrl(updated.find((p) => p.position === 1)?.photo_url ?? null);
   }
 
-  async function handleIdFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file || !userId) return;
-
+  async function handleSubmitIdNumber() {
     setSubmittingId(true);
-    setError(null);
+    setIdError(null);
 
-    const { error: submitError } = await submitIdDocument(file, userId);
+    const { error: submitError } = await submitIdNumber(idNumber);
 
     setSubmittingId(false);
 
-    if (submitError) return setError(submitError);
+    if (submitError) return setIdError(submitError);
 
-    setIdStatus("pending");
+    setIdStatus("verified");
   }
 
   const handleLogout = async () => {
@@ -248,6 +252,8 @@ export default function SitterProfilePage() {
     setSaving(true);
     setError(null);
 
+    const filledReferences = references.filter((r) => r.name.trim());
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
@@ -256,6 +262,8 @@ export default function SitterProfilePage() {
         services,
         comfortable_with: comfortableWith,
         avatar_url: avatarUrl,
+        languages_spoken: languages,
+        sitter_references: filledReferences.length > 0 ? filledReferences : null,
       })
       .eq("id", userId);
 
@@ -318,37 +326,30 @@ export default function SitterProfilePage() {
 
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           <span className="flex items-center gap-1 rounded-lg bg-[#F1EEE6] px-2 py-1 text-[0.66rem] font-bold text-forest">
-            {idStatus === "verified"
-              ? "✅ ID Verified"
-              : idStatus === "pending"
-                ? "⏳ ID under review"
-                : idStatus === "rejected"
-                  ? "❌ ID not approved"
-                  : "🪪 ID not submitted"}
+            {idStatus === "verified" ? "✅ ID Verified" : "🪪 ID not submitted"}
           </span>
-          {(idStatus === "not_started" || idStatus === "rejected") && (
-            <>
-              <input
-                ref={idFileInputRef}
-                type="file"
-                accept="image/*,.pdf"
-                className="hidden"
-                onChange={handleIdFileChange}
-              />
-              <button
-                type="button"
-                disabled={submittingId}
-                onClick={() => idFileInputRef.current?.click()}
-                className="rounded-lg bg-terracotta px-2 py-1 text-[0.66rem] font-bold text-white disabled:opacity-50"
-              >
-                {submittingId ? "Uploading…" : "Submit for verification"}
-              </button>
-            </>
-          )}
         </div>
-        {idStatus === "rejected" && idNote && (
-          <p className="mt-2 text-xs leading-relaxed text-terracotta">{idNote}</p>
+        {idStatus === "not_started" && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={idNumber}
+              onChange={(e) => setIdNumber(e.target.value.replace(/\D/g, "").slice(0, 13))}
+              placeholder="13-digit ID number"
+              className="flex-1 rounded-lg border-[1.5px] border-line bg-white px-2.5 py-1.5 text-xs text-ink"
+            />
+            <button
+              type="button"
+              disabled={submittingId || !isValidSaIdNumber(idNumber)}
+              onClick={handleSubmitIdNumber}
+              className="shrink-0 rounded-lg bg-terracotta px-2.5 py-1.5 text-[0.66rem] font-bold text-white disabled:opacity-50"
+            >
+              {submittingId ? "Verifying…" : "Verify"}
+            </button>
+          </div>
         )}
+        {idError && <p className="mt-2 text-xs leading-relaxed text-terracotta">{idError}</p>}
 
         {!isOwner && (
           <div className="mt-4 rounded-2xl border-[1.5px] border-dashed border-line bg-white p-4">
@@ -638,6 +639,117 @@ export default function SitterProfilePage() {
             <p className="text-xs text-muted">Nothing selected yet.</p>
           )}
         </div>
+      </div>
+
+      <div className="px-5 pt-5">
+        <h4 className="mb-2 font-serif text-base font-semibold text-ink">Languages spoken</h4>
+        <div className="flex flex-wrap gap-1.5">
+          {(isEditing ? LANGUAGES : languages).map((l) => {
+            const on = languages.includes(l);
+            return isEditing ? (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLanguages((prev) => toggleInList(prev, l))}
+                className={`rounded-full border-[1.5px] px-3 py-1.5 text-xs font-bold ${
+                  on ? "border-forest bg-forest text-white" : "border-line bg-white text-ink"
+                }`}
+              >
+                {l}
+              </button>
+            ) : (
+              <span
+                key={l}
+                className="rounded-full border-[1.5px] border-forest bg-forest px-3 py-1.5 text-xs font-bold text-white"
+              >
+                {l}
+              </span>
+            );
+          })}
+          {!isEditing && languages.length === 0 && (
+            <p className="text-xs text-muted">Nothing selected yet.</p>
+          )}
+        </div>
+      </div>
+
+      <div className="px-5 pt-5">
+        <h4 className="mb-2 font-serif text-base font-semibold text-ink">References</h4>
+        {isEditing ? (
+          <>
+            {references.map((ref, i) => (
+              <div key={i} className="mb-2.5 rounded-2xl border-[1.5px] border-line bg-white p-3.5">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-bold text-ink">Reference {i + 1}</span>
+                  {references.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => setReferences((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="text-xs font-bold text-terracotta"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={ref.name}
+                  onChange={(e) =>
+                    setReferences((prev) =>
+                      prev.map((r, idx) => (idx === i ? { ...r, name: e.target.value } : r)),
+                    )
+                  }
+                  placeholder="Name"
+                  className="mb-2 w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm text-ink"
+                />
+                <input
+                  type="text"
+                  value={ref.relationship}
+                  onChange={(e) =>
+                    setReferences((prev) =>
+                      prev.map((r, idx) => (idx === i ? { ...r, relationship: e.target.value } : r)),
+                    )
+                  }
+                  placeholder="Relationship — e.g. previous client, employer"
+                  className="mb-2 w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm text-ink"
+                />
+                <input
+                  type="text"
+                  value={ref.contact}
+                  onChange={(e) =>
+                    setReferences((prev) =>
+                      prev.map((r, idx) => (idx === i ? { ...r, contact: e.target.value } : r)),
+                    )
+                  }
+                  placeholder="Phone or email"
+                  className="w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm text-ink"
+                />
+              </div>
+            ))}
+            {references.length < 3 && (
+              <button
+                type="button"
+                onClick={() => setReferences((prev) => [...prev, emptyReference()])}
+                className="w-full rounded-2xl border-[1.5px] border-dashed border-line bg-white py-2.5 text-xs font-bold text-forest"
+              >
+                + Add another reference
+              </button>
+            )}
+          </>
+        ) : references.filter((r) => r.name.trim()).length === 0 ? (
+          <p className="text-xs text-muted">No references added.</p>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {references
+              .filter((r) => r.name.trim())
+              .map((r, i) => (
+                <div key={i} className="rounded-2xl border border-line bg-white p-3.5">
+                  <div className="text-sm font-bold text-ink">{r.name}</div>
+                  <div className="text-xs text-muted">{r.relationship}</div>
+                  <div className="text-xs text-muted">{r.contact}</div>
+                </div>
+              ))}
+          </div>
+        )}
       </div>
 
       <div className="px-5 pt-5 pb-6">

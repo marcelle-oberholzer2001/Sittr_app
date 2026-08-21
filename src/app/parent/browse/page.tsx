@@ -68,7 +68,9 @@ function BrowseSittersContent() {
 
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name, bio, coverage_areas, services, comfortable_with, rates, avatar_url")
+        .select(
+          "id, full_name, bio, coverage_areas, services, comfortable_with, rates, avatar_url, id_verification_status",
+        )
         .eq("is_sitter", true);
 
       if (!error && data) {
@@ -90,18 +92,16 @@ function BrowseSittersContent() {
               .in("sitter_id", sitterIds)
               .gte("date", dateFrom)
               .lte("date", dateTo),
-            supabase
-              .from("bookings")
-              .select("sitter_id")
-              .in("sitter_id", sitterIds)
-              .in("status", ["accepted", "agreed", "paid"])
-              .lte("date_from", dateTo)
-              .gte("date_to", dateFrom),
+            supabase.rpc("get_unavailable_sitters", {
+              p_sitter_ids: sitterIds,
+              p_date_from: dateFrom,
+              p_date_to: dateTo,
+            }),
           ]);
           setUnavailableSitterIds(
             new Set([
               ...(blockedRes.data ?? []).map((r) => r.sitter_id),
-              ...(bookingsRes.data ?? []).map((r) => r.sitter_id),
+              ...(bookingsRes.data ?? []).map((r: { sitter_id: string }) => r.sitter_id),
             ]),
           );
         } else {
@@ -126,7 +126,7 @@ function BrowseSittersContent() {
               initial: initialFor(row.full_name || "S"),
               avatarColor: avatarColorFor(row.id),
               avatarUrl: row.avatar_url ?? null,
-              verified: "new" as const,
+              verified: row.id_verification_status === "verified" ? ("verified" as const) : ("new" as const),
               distanceKm: null,
               rates: row.rates ?? {},
               rating: ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : undefined,

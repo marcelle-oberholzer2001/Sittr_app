@@ -13,7 +13,9 @@ export default async function SitterProfilePage({
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, full_name, bio, coverage_areas, services, comfortable_with, rates, avatar_url, intro_video_url")
+    .select(
+      "id, full_name, bio, coverage_areas, services, comfortable_with, rates, avatar_url, intro_video_url, id_verification_status, languages_spoken, sitter_references",
+    )
     .eq("id", id)
     .eq("is_sitter", true)
     .single();
@@ -56,7 +58,7 @@ export default async function SitterProfilePage({
     initial: initialFor(data.full_name || "S"),
     avatarColor: avatarColorFor(data.id),
     avatarUrl: data.avatar_url ?? null,
-    verified: "new",
+    verified: data.id_verification_status === "verified" ? "verified" : "new",
     distanceKm: null,
     rates: data.rates ?? {},
     rating: avgRating,
@@ -68,6 +70,8 @@ export default async function SitterProfilePage({
     photos,
     introVideoUrl: data.intro_video_url,
     reviews,
+    languages: data.languages_spoken ?? [],
+    references: data.sitter_references ?? [],
   };
 
   return (

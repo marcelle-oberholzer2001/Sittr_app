@@ -21,8 +21,8 @@ export default function SitterWelcomePage() {
             ✓
           </div>
           <div>
-            <h4 className="text-sm font-bold text-ink">ID document</h4>
-            <p className="text-xs text-muted">Uploaded — under review</p>
+            <h4 className="text-sm font-bold text-ink">ID verification</h4>
+            <p className="text-xs text-muted">Verified</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -36,9 +36,8 @@ export default function SitterWelcomePage() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-xl bg-[#F3E3D6] px-4 py-3 text-xs leading-relaxed font-bold text-terracotta">
-        ⏳ Your profile stays hidden from search until your ID is approved — usually 1–3 days. We&apos;ll
-        notify you the moment you&apos;re live.
+      <div className="mb-6 rounded-xl bg-[#E4EEE9] px-4 py-3 text-xs leading-relaxed font-bold text-forest">
+        ✅ You&apos;re live — owners searching in your coverage areas can already find and book you.
       </div>
 
       <button

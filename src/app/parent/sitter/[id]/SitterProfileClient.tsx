@@ -22,7 +22,7 @@ export default function SitterProfileClient({ sitter }: { sitter: Sitter }) {
   const petIds = searchParams.get("petIds")?.split(",").filter(Boolean) ?? [];
   const dateFrom = searchParams.get("from");
   const dateTo = searchParams.get("to");
-  const [requesting, setRequesting] = useState(false);
+  const [requesting, setRequesting] = useState(searchParams.get("requesting") === "1");
   const [trustScore, setTrustScore] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -168,6 +168,37 @@ export default function SitterProfileClient({ sitter }: { sitter: Sitter }) {
           ))}
         </div>
       </div>
+
+      {sitter.languages && sitter.languages.length > 0 && (
+        <div className="px-5 pt-5">
+          <h4 className="mb-2 font-serif text-sm font-semibold text-ink">Languages spoken</h4>
+          <div className="flex flex-wrap gap-1.5">
+            {sitter.languages.map((l) => (
+              <span
+                key={l}
+                className="rounded-full border-[1.5px] border-forest bg-forest px-3 py-1.5 text-xs font-bold text-white"
+              >
+                {l}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {sitter.references && sitter.references.length > 0 && (
+        <div className="px-5 pt-5">
+          <h4 className="mb-2 font-serif text-sm font-semibold text-ink">References</h4>
+          <div className="flex flex-col gap-2">
+            {sitter.references.map((r, i) => (
+              <div key={i} className="rounded-2xl border border-line bg-white p-3.5">
+                <div className="text-sm font-bold text-ink">{r.name}</div>
+                <div className="text-xs text-muted">{r.relationship}</div>
+                <div className="text-xs text-muted">{r.contact}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="px-5 pt-5">
         <h4 className="mb-2 font-serif text-sm font-semibold text-ink">

@@ -6,11 +6,23 @@ import { SPECIES, DOG_SIZES, type SpeciesKey } from "@/lib/species";
 import { SUBURB_SUGGESTIONS } from "@/lib/suburbs";
 import { SERVICES, DEFAULT_RATES, type ServiceKey } from "@/lib/pet-services";
 import { supabase } from "@/lib/supabase/client";
-import { submitIdDocument } from "@/lib/upload-id-document";
+import { isValidSaIdNumber, submitIdNumber } from "@/lib/submit-id-number";
 import { uploadPhoto } from "@/lib/upload-photo";
 import { fetchSitterPhotos, type SitterPhoto } from "@/lib/sitter-photos";
+import { LANGUAGES, emptyReference, type SitterReference } from "@/lib/languages";
 
 type Sex = "Male" | "Female";
+
+function isAdult(dob: string): boolean {
+  if (!dob) return false;
+  const birthDate = new Date(dob);
+  if (Number.isNaN(birthDate.getTime())) return false;
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) age--;
+  return age >= 18;
+}
 
 const WORK_SCHEDULES = [
   "Full-time, 9–5 (office)",
@@ -80,7 +92,7 @@ const PREF_CARDS: PrefCard[] = [
     why: "Dogs only",
     options: DOG_SIZE_OPTIONS,
     defaultOn: ["Small dogs", "Medium dogs", "Large dogs"],
-    serviceKeys: ["walking"],
+    serviceKeys: ["walking30", "walking60"],
   },
 ];
 
@@ -159,8 +171,10 @@ function UploadBox({
 export default function SitterOnboardingPage() {
   const router = useRouter();
   const [current, setCurrent] = useState(1);
-  const [coverageAreas, setCoverageAreas] = useState<string[]>(["Moreleta Park, Centurion"]);
+  const [coverageAreas, setCoverageAreas] = useState<string[]>([]);
   const [suburbQuery, setSuburbQuery] = useState("");
+  const [legalName, setLegalName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [sex, setSex] = useState<Sex>("Male");
   const [workSchedule, setWorkSchedule] = useState<(typeof WORK_SCHEDULES)[number]>(WORK_SCHEDULES[0]);
   const [hasLicense, setHasLicense] = useState<"Yes" | "No">("Yes");
@@ -168,6 +182,10 @@ export default function SitterOnboardingPage() {
   const [experienceYears, setExperienceYears] = useState(3);
   const [rates, setRates] = useState(DEFAULT_RATES);
   const [skills, setSkills] = useState<string[]>([SKILLS[0]]);
+  const [languages, setLanguages] = useState<string[]>(["English"]);
+  const [references, setReferences] = useState<SitterReference[]>([emptyReference()]);
+  const [householdPets, setHouseholdPets] = useState("");
+  const [householdPeople, setHouseholdPeople] = useState("");
   const [fencedYard, setFencedYard] = useState<"Yes" | "No">("Yes");
   const [smokesIndoors, setSmokesIndoors] = useState<"Yes" | "No">("No");
   const [petPrefs, setPetPrefs] = useState<Record<string, string[]>>(
@@ -176,10 +194,7 @@ export default function SitterOnboardingPage() {
   const [emergencyContact, setEmergencyContact] = useState("");
   const [finishing, setFinishing] = useState(false);
   const [finishError, setFinishError] = useState<string | null>(null);
-  const [idDocumentUploaded, setIdDocumentUploaded] = useState(false);
-  const [idUploading, setIdUploading] = useState(false);
-  const [idUploadError, setIdUploadError] = useState<string | null>(null);
-  const idFileInputRef = useRef<HTMLInputElement>(null);
+  const [idNumber, setIdNumber] = useState("");
   const [photos, setPhotos] = useState<SitterPhoto[]>([]);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [removingPosition, setRemovingPosition] = useState<number | null>(null);
@@ -218,6 +233,24 @@ export default function SitterOnboardingPage() {
 
   function toggleSkill(skill: string) {
     setSkills((prev) => (prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]));
+  }
+
+  function toggleLanguage(language: string) {
+    setLanguages((prev) =>
+      prev.includes(language) ? prev.filter((l) => l !== language) : [...prev, language],
+    );
+  }
+
+  function updateReference(index: number, patch: Partial<SitterReference>) {
+    setReferences((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
+  }
+
+  function addReference() {
+    setReferences((prev) => (prev.length >= 3 ? prev : [...prev, emptyReference()]));
+  }
+
+  function removeReference(index: number) {
+    setReferences((prev) => prev.filter((_, i) => i !== index));
   }
 
   function togglePref(cardKey: string, option: string) {
@@ -274,27 +307,6 @@ export default function SitterOnboardingPage() {
     setPhotos(await fetchSitterPhotos(uid));
   }
 
-  async function handleIdFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-
-    const { data: userData } = await supabase.auth.getUser();
-    const uid = userData.user?.id;
-    if (!uid) return;
-
-    setIdUploading(true);
-    setIdUploadError(null);
-
-    const { error: submitError } = await submitIdDocument(file, uid);
-
-    setIdUploading(false);
-
-    if (submitError) return setIdUploadError(submitError);
-
-    setIdDocumentUploaded(true);
-  }
-
   async function handleFinish() {
     setFinishing(true);
     setFinishError(null);
@@ -309,6 +321,7 @@ export default function SitterOnboardingPage() {
 
     const services = SERVICES.filter((s) => rates[s.key].enabled).map((s) => s.label);
     const comfortableWith = [...new Set(visiblePrefCards.flatMap((card) => petPrefs[card.key] ?? []))];
+    const filledReferences = references.filter((r) => r.name.trim());
 
     const { error: updateError } = await supabase
       .from("profiles")
@@ -321,13 +334,32 @@ export default function SitterOnboardingPage() {
         emergency_contact: emergencyContact,
         has_drivers_license: hasLicense === "Yes",
         backup_driver_contact: hasLicense === "No" ? backupDriverContact.trim() || null : null,
+        legal_name: legalName.trim(),
+        date_of_birth: dateOfBirth,
+        sex,
+        experience_years: experienceYears,
+        skills,
+        languages_spoken: languages,
+        sitter_references: filledReferences.length > 0 ? filledReferences : null,
+        household_pets: householdPets.trim() || null,
+        household_people: householdPeople.trim() || null,
+        fenced_yard: fencedYard === "Yes",
+        smokes_indoors: smokesIndoors === "Yes",
       })
       .eq("id", uid);
 
+    if (updateError) {
+      setFinishing(false);
+      setFinishError(updateError.message);
+      return;
+    }
+
+    const { error: idError } = await submitIdNumber(idNumber);
+
     setFinishing(false);
 
-    if (updateError) {
-      setFinishError(updateError.message);
+    if (idError) {
+      setFinishError(idError);
       return;
     }
 
@@ -503,6 +535,8 @@ export default function SitterOnboardingPage() {
               <label className="mb-1.5 block text-xs font-bold text-ink">Full legal name</label>
               <input
                 type="text"
+                value={legalName}
+                onChange={(e) => setLegalName(e.target.value)}
                 placeholder="As it appears on your ID"
                 className="w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-3 text-sm text-ink"
               />
@@ -511,12 +545,19 @@ export default function SitterOnboardingPage() {
               <label className="mb-1.5 block text-xs font-bold text-ink">Date of birth</label>
               <input
                 type="date"
+                value={dateOfBirth}
+                onChange={(e) => setDateOfBirth(e.target.value)}
                 className="w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-3 text-sm text-ink"
               />
               <p className="mt-1 text-xs text-muted">
                 You must be 18+ to sit on Sittr — no exceptions. If a pet needs emergency vet care, a
                 sitter needs to legally sign for treatment, drive, and be held accountable.
               </p>
+              {dateOfBirth && !isAdult(dateOfBirth) && (
+                <p className="mt-1 text-xs font-bold text-terracotta">
+                  You need to be 18 or older to sit on Sittr.
+                </p>
+              )}
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-bold text-ink">Sex (as on your ID)</label>
@@ -606,37 +647,15 @@ export default function SitterOnboardingPage() {
               Your ID is required before you can accept any bookings. This is what owners are trusting
               when they book you.
             </p>
+            <label className="mb-1.5 block text-xs font-bold text-ink">SA ID number</label>
             <input
-              ref={idFileInputRef}
-              type="file"
-              accept="image/*,.pdf"
-              className="hidden"
-              onChange={handleIdFileChange}
+              type="text"
+              inputMode="numeric"
+              value={idNumber}
+              onChange={(e) => setIdNumber(e.target.value.replace(/\D/g, "").slice(0, 13))}
+              placeholder="13-digit ID number"
+              className="mb-3 w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-3 text-sm text-ink"
             />
-            <button
-              type="button"
-              disabled={idUploading}
-              onClick={() => idFileInputRef.current?.click()}
-              className="w-full disabled:opacity-60"
-            >
-              <UploadBox
-                icon="🪪"
-                title="ID document"
-                desc={
-                  idUploading
-                    ? "Uploading…"
-                    : idDocumentUploaded
-                      ? "Uploaded — submitted for review"
-                      : "Tap to upload a driver's license, passport, or SA ID"
-                }
-                done={idDocumentUploaded}
-              />
-            </button>
-            {idUploadError && (
-              <p className="mb-3 rounded-xl bg-[#FDECE3] px-3.5 py-3 text-xs leading-relaxed text-terracotta">
-                {idUploadError}
-              </p>
-            )}
 
             <div className="my-3.5 text-center text-[0.68rem] font-extrabold tracking-wide text-muted uppercase">
               Optional, but strongly recommended
@@ -653,8 +672,8 @@ export default function SitterOnboardingPage() {
               meaningfully boosts your Trust Score — owners can filter for it, and it&apos;s the single
               biggest thing you can do to stand out in search.
             </div>
-            <div className="rounded-xl bg-[#F3E3D6] p-2.5 text-center text-xs font-bold text-terracotta">
-              ⏳ Your profile stays hidden from search until your ID is approved (usually 1–3 days)
+            <div className="rounded-xl bg-[#E4EEE9] p-2.5 text-center text-xs font-bold text-forest">
+              ✅ Your ID number is verified instantly — no waiting before you can go live.
             </div>
           </div>
         )}
@@ -744,6 +763,79 @@ export default function SitterOnboardingPage() {
                 );
               })}
             </div>
+
+            <label className="mt-4 mb-1.5 block text-xs font-bold text-ink">Languages you speak</label>
+            <div className="flex flex-wrap gap-2">
+              {LANGUAGES.map((language) => {
+                const on = languages.includes(language);
+                return (
+                  <button
+                    key={language}
+                    type="button"
+                    onClick={() => toggleLanguage(language)}
+                    className={`rounded-full border-[1.5px] px-3.5 py-2 text-xs font-bold ${
+                      on ? "border-forest bg-forest text-white" : "border-line bg-white text-ink"
+                    }`}
+                  >
+                    {language}
+                  </button>
+                );
+              })}
+            </div>
+
+            <label className="mt-4 mb-1.5 block text-xs font-bold text-ink">
+              References <span className="font-normal text-muted">(optional)</span>
+            </label>
+            <p className="mb-2.5 text-xs leading-relaxed text-muted">
+              People an owner could contact about your pet care — a previous client, employer, or someone
+              who knows your work.
+            </p>
+            {references.map((ref, i) => (
+              <div key={i} className="mb-2.5 rounded-2xl border-[1.5px] border-line bg-white p-3.5">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-bold text-ink">Reference {i + 1}</span>
+                  {references.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeReference(i)}
+                      className="text-xs font-bold text-terracotta"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="text"
+                  value={ref.name}
+                  onChange={(e) => updateReference(i, { name: e.target.value })}
+                  placeholder="Name"
+                  className="mb-2 w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm text-ink"
+                />
+                <input
+                  type="text"
+                  value={ref.relationship}
+                  onChange={(e) => updateReference(i, { relationship: e.target.value })}
+                  placeholder="Relationship — e.g. previous client, employer"
+                  className="mb-2 w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm text-ink"
+                />
+                <input
+                  type="text"
+                  value={ref.contact}
+                  onChange={(e) => updateReference(i, { contact: e.target.value })}
+                  placeholder="Phone or email"
+                  className="w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-2.5 text-sm text-ink"
+                />
+              </div>
+            ))}
+            {references.length < 3 && (
+              <button
+                type="button"
+                onClick={addReference}
+                className="w-full rounded-2xl border-[1.5px] border-dashed border-line bg-white py-2.5 text-xs font-bold text-forest"
+              >
+                + Add another reference
+              </button>
+            )}
           </div>
         )}
 
@@ -758,6 +850,8 @@ export default function SitterOnboardingPage() {
               <label className="mb-1.5 block text-xs font-bold text-ink">Other pets living in your home</label>
               <input
                 type="text"
+                value={householdPets}
+                onChange={(e) => setHouseholdPets(e.target.value)}
                 placeholder="e.g. 1 cat, 1 medium dog"
                 className="w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-3 text-sm text-ink"
               />
@@ -766,6 +860,8 @@ export default function SitterOnboardingPage() {
               <label className="mb-1.5 block text-xs font-bold text-ink">Other people living in your home</label>
               <input
                 type="text"
+                value={householdPeople}
+                onChange={(e) => setHouseholdPeople(e.target.value)}
                 placeholder="e.g. spouse, 2 children"
                 className="w-full rounded-xl border-[1.5px] border-line bg-white px-3.5 py-3 text-sm text-ink"
               />
@@ -912,7 +1008,11 @@ export default function SitterOnboardingPage() {
           <button
             type="button"
             disabled={
-              finishing || (current === 2 && photos.length === 0) || (current === 5 && !idDocumentUploaded)
+              finishing ||
+              (current === 1 && coverageAreas.length === 0) ||
+              (current === 2 &&
+                (photos.length === 0 || !legalName.trim() || !isAdult(dateOfBirth))) ||
+              (current === 5 && !isValidSaIdNumber(idNumber))
             }
             onClick={() => (isLast ? handleFinish() : go(1))}
             className="flex-1 rounded-2xl bg-forest py-3.5 text-sm font-bold text-white disabled:opacity-50"

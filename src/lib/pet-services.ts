@@ -3,12 +3,21 @@ export const SERVICE_NAMES = [
   "2x daily visits",
   "Daytime pet sit",
   "Overnight / sleepover",
-  "Dog walking",
+  "Dog walking (30 min)",
+  "Dog walking (60 min)",
   "Boarding at my home",
   "Doggy daycare",
 ] as const;
 
-export type ServiceKey = "visit1" | "visit2" | "daysit" | "overnight" | "walking" | "boarding" | "daycare";
+export type ServiceKey =
+  | "visit1"
+  | "visit2"
+  | "daysit"
+  | "overnight"
+  | "walking30"
+  | "walking60"
+  | "boarding"
+  | "daycare";
 
 export interface ServiceDef {
   key: ServiceKey;
@@ -22,7 +31,8 @@ export const SERVICES: ServiceDef[] = [
   { key: "visit2", label: "2x daily visits", unit: "/ day" },
   { key: "daysit", label: "Daytime pet sit", unit: "/ day" },
   { key: "overnight", label: "Overnight / sleepover", unit: "/ night" },
-  { key: "walking", label: "Dog walking", unit: "/ walk" },
+  { key: "walking30", label: "Dog walking (30 min)", unit: "/ walk" },
+  { key: "walking60", label: "Dog walking (60 min)", unit: "/ walk" },
   { key: "boarding", label: "Boarding at my home", unit: "/ night", clay: true },
   { key: "daycare", label: "Doggy daycare", unit: "/ day", clay: true },
 ];
@@ -32,7 +42,8 @@ export const DEFAULT_RATES: Record<ServiceKey, { enabled: boolean; rate: string 
   visit2: { enabled: true, rate: "140" },
   daysit: { enabled: false, rate: "" },
   overnight: { enabled: true, rate: "300" },
-  walking: { enabled: false, rate: "" },
+  walking30: { enabled: false, rate: "" },
+  walking60: { enabled: false, rate: "" },
   boarding: { enabled: true, rate: "280" },
   daycare: { enabled: true, rate: "150" },
 };

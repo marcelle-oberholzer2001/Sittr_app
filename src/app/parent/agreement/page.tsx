@@ -597,7 +597,6 @@ export default function BookingAgreementPage() {
           {selected.pets.map((p) => (
             <p key={p.id} className="text-xs leading-relaxed text-[#4a4438]">
               {p.name}&apos;s vet: {p.vet_name || "Not provided"}
-              {p.vet_phone ? `, ${p.vet_phone}` : ""}
             </p>
           ))}
           <p className="mt-1 text-xs leading-relaxed text-[#4a4438]">

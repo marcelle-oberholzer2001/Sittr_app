@@ -26,6 +26,7 @@ function formatDateRange(from: string, to: string) {
 
 function SitterHome({ router, isVerified }: { router: Router; isVerified: boolean }) {
   const [pendingRequests, setPendingRequests] = useState<SitterBookingPreview[]>([]);
+  const [activeSits, setActiveSits] = useState<SitterBookingPreview[]>([]);
   const [needsReview, setNeedsReview] = useState<SitterBookingPreview[]>([]);
 
   useEffect(() => {
@@ -67,6 +68,9 @@ function SitterHome({ router, isVerified }: { router: Router; isVerified: boolea
       });
 
       setPendingRequests(bookings.filter((b) => b.status === "pending").map(toPreview));
+      setActiveSits(
+        bookings.filter((b) => b.status === "accepted" || b.status === "agreed" || b.status === "paid").map(toPreview),
+      );
       setNeedsReview(
         bookings.filter((b) => b.status === "completed" && !reviewedIds.has(b.id)).map(toPreview),
       );
@@ -141,9 +145,38 @@ function SitterHome({ router, isVerified }: { router: Router; isVerified: boolea
         </button>
       </div>
 
+      {activeSits.length > 0 && (
+        <>
+          <div className="mb-2 text-[0.72rem] font-extrabold tracking-wide text-terracotta uppercase">
+            Active sits
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push(`/sitter/requests?bookingId=${activeSits[0].id}`)}
+            className="mb-2.5 flex w-full items-center gap-3 rounded-2xl border border-line bg-white p-3.5 text-left"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-forest font-serif font-semibold text-white">
+              {activeSits[0].ownerName.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-bold text-ink">
+                {activeSits[0].ownerName} — {activeSits[0].serviceType} for {activeSits[0].petName}
+              </div>
+              <div className="text-xs text-muted">
+                {formatDateRange(activeSits[0].dateFrom, activeSits[0].dateTo)}
+              </div>
+            </div>
+            <span className="text-muted">›</span>
+          </button>
+          {activeSits.length > 1 && (
+            <p className="mb-2.5 text-xs text-muted">+{activeSits.length - 1} more active</p>
+          )}
+        </>
+      )}
+
       <div className="mb-2 text-[0.72rem] font-extrabold tracking-wide text-terracotta uppercase">Requests</div>
 
-      {pendingRequests.length === 0 && needsReview.length === 0 && (
+      {pendingRequests.length === 0 && needsReview.length === 0 && activeSits.length === 0 && (
         <p className="rounded-2xl border-[1.5px] border-dashed border-line bg-white px-3.5 py-5 text-center text-xs text-muted">
           Nothing new right now.
         </p>
@@ -304,9 +337,16 @@ function ParentHome({ router }: { router: Router }) {
       <button
         type="button"
         onClick={() => router.push("/parent/quick-start")}
-        className="mb-4 w-full rounded-2xl bg-forest py-4 text-sm font-bold text-white"
+        className="mb-2.5 w-full rounded-2xl bg-forest py-4 text-sm font-bold text-white"
       >
         🔍 Find a sitter
+      </button>
+      <button
+        type="button"
+        onClick={() => router.push("/parent/book-again")}
+        className="mb-4 w-full rounded-2xl border-[1.5px] border-forest py-3 text-xs font-bold text-forest"
+      >
+        🔁 Book a sitter again
       </button>
 
       <div className="mb-2 flex items-center justify-between">

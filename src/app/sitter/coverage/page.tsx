@@ -1,16 +1,34 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SUBURB_SUGGESTIONS } from "@/lib/suburbs";
+import { supabase } from "@/lib/supabase/client";
 
 export default function SitterCoveragePage() {
   const router = useRouter();
-  const [coverageAreas, setCoverageAreas] = useState<string[]>([
-    "Moreleta Park, Centurion",
-    "Garsfontein, Pretoria",
-  ]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [coverageAreas, setCoverageAreas] = useState<string[]>([]);
   const [suburbQuery, setSuburbQuery] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) {
+        setLoading(false);
+        return;
+      }
+      setUserId(uid);
+
+      const { data } = await supabase.from("profiles").select("coverage_areas").eq("id", uid).single();
+      setCoverageAreas(data?.coverage_areas ?? []);
+      setLoading(false);
+    })();
+  }, []);
 
   function addCoverageArea(area: string) {
     setCoverageAreas((prev) => (prev.includes(area) ? prev : [...prev, area]));
@@ -19,6 +37,30 @@ export default function SitterCoveragePage() {
 
   function removeCoverageArea(area: string) {
     setCoverageAreas((prev) => prev.filter((a) => a !== area));
+  }
+
+  async function handleSave() {
+    if (!userId) return;
+    setSaving(true);
+    setError(null);
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({ coverage_areas: coverageAreas })
+      .eq("id", userId);
+
+    setSaving(false);
+
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+
+    router.push("/home");
+  }
+
+  if (loading) {
+    return <div className="min-h-screen bg-paper" />;
   }
 
   return (
@@ -92,12 +134,18 @@ export default function SitterCoveragePage() {
           shown — only the suburb names you add here.
         </p>
 
+        {error && (
+          <p className="mb-4 rounded-xl bg-[#FDECE3] px-3.5 py-3 text-xs leading-relaxed text-terracotta">
+            {error}
+          </p>
+        )}
         <button
           type="button"
-          onClick={() => router.push("/home")}
-          className="w-full rounded-2xl bg-forest py-4 text-sm font-bold text-white"
+          disabled={saving}
+          onClick={handleSave}
+          className="w-full rounded-2xl bg-forest py-4 text-sm font-bold text-white disabled:opacity-50"
         >
-          Save coverage areas
+          {saving ? "Saving…" : "Save coverage areas"}
         </button>
       </div>
     </div>

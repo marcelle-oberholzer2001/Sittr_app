@@ -6,7 +6,6 @@ export interface BookingPet {
   species: string;
   size: string | null;
   vet_name: string | null;
-  vet_phone: string | null;
 }
 
 export async function fetchPetsByBooking(bookingIds: string[]): Promise<Map<string, BookingPet[]>> {
@@ -15,7 +14,7 @@ export async function fetchPetsByBooking(bookingIds: string[]): Promise<Map<stri
 
   const { data } = await supabase
     .from("booking_pets")
-    .select("booking_id, pets(id, name, species, size, vet_name, vet_phone)")
+    .select("booking_id, pets(id, name, species, size, vet_name)")
     .in("booking_id", bookingIds);
 
   for (const row of (data ?? []) as unknown as { booking_id: string; pets: BookingPet }[]) {

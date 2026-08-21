@@ -28,7 +28,7 @@ export default function ParentQuickStartPage() {
   const [loading, setLoading] = useState(true);
   const [pets, setPets] = useState<Pet[]>([]);
   const [petIds, setPetIds] = useState<string[]>([]);
-  const [location, setLocation] = useState(SUBURB_SUGGESTIONS[0]);
+  const [location, setLocation] = useState("");
   const [locationQuery, setLocationQuery] = useState("");
   const [dateFrom, setDateFrom] = useState(() => isoDaysFromNow(7));
   const [dateTo, setDateTo] = useState(() => isoDaysFromNow(9));
@@ -153,7 +153,7 @@ export default function ParentQuickStartPage() {
                 type="text"
                 value={locationQuery}
                 onChange={(e) => setLocationQuery(e.target.value)}
-                placeholder={location}
+                placeholder={location || "Search a suburb"}
                 className="w-full text-sm font-bold text-ink outline-none"
               />
             </div>
@@ -282,16 +282,22 @@ export default function ParentQuickStartPage() {
           How matching works
         </div>
         <p className="text-xs leading-relaxed text-forest">
-          Only sitters who (1) cover {location}, (2) offer &quot;{service},&quot; and (3) are comfortable
-          with {petIds.length > 1 ? "all your selected pets" : "your pet"} will appear — and you&apos;ll
-          only see their {service} rate, not their other prices.
+          {location ? (
+            <>
+              Only sitters who (1) cover {location}, (2) offer &quot;{service},&quot; and (3) are
+              comfortable with {petIds.length > 1 ? "all your selected pets" : "your pet"} will appear —
+              and you&apos;ll only see their {service} rate, not their other prices.
+            </>
+          ) : (
+            "Choose a location above to see sitters who actually cover your area."
+          )}
         </p>
       </div>
 
       <div className="mx-5 mt-4">
         <button
           type="button"
-          disabled={petIds.length === 0}
+          disabled={petIds.length === 0 || !location}
           onClick={search}
           className="w-full rounded-2xl bg-forest py-4 text-sm font-bold text-white disabled:opacity-40"
         >
